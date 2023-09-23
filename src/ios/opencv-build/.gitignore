@@ -1,0 +1,6 @@
+*.zip
+*.tar.gz
+opencv-*/
+opencv_contrib-*/
+openjpeg-*/
+cmake-build-*/
