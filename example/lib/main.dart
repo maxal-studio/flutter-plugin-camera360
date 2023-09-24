@@ -28,21 +28,47 @@ class _MyAppState extends State<MyApp> {
         appBar: AppBar(
           title: const Text('Native Packages'),
         ),
-        body: Camera(
+        body: CameraPage(),
+      ),
+    );
+  }
+}
+
+class CameraPage extends StatefulWidget {
+  const CameraPage({super.key});
+
+  @override
+  State<CameraPage> createState() => _CameraPageState();
+}
+
+class _CameraPageState extends State<CameraPage> {
+  @override
+  Widget build(BuildContext context) {
+    void displayPanoramaMessage(context, String message) {
+      final snackBar = SnackBar(
+        content: Text(message),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    }
+
+    return Stack(
+      children: [
+        Camera(
           userSelectedCameraKey: 0,
           onCaptureEnded: (data) {
             if (data['success'] == true) {
               XFile panorama = data['panorama'];
-              print("Final image returned $panorama.toString()");
+              displayPanoramaMessage(context, 'Panorama saved!');
             } else {
-              print("Final image failed");
+              displayPanoramaMessage(context, 'Panorama failed!');
             }
           },
           onCameraChanged: (cameraKey) {
-            print("Camera changed ${cameraKey.toString()}");
+            displayPanoramaMessage(
+                context, "Camera changed ${cameraKey.toString()}");
           },
         ),
-      ),
+      ],
     );
   }
 }
