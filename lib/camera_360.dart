@@ -315,6 +315,8 @@ class _CameraState extends State<Camera> {
     }
 
     if (helperDotHorizontalReach! <= lastSuccessHorizontalPosition) {
+      debugPrint(
+          "Stitching failed because: helperDotHorizontalReach:${helperDotHorizontalReach} <= lastSuccessHorizontalPosition:${lastSuccessHorizontalPosition}");
       stitchingFailed();
     }
   }
@@ -686,56 +688,46 @@ class _CameraState extends State<Camera> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Text(
-                          "nrPhotos: $nrPhotos",
-                          style: const TextStyle(color: Colors.white),
+                          "nrPhotos/taken: $nrPhotos / $nrPhotosTaken",
+                          style: const TextStyle(
+                              color: Colors.white,
+                              backgroundColor: Colors.black),
                         ),
                         Text(
-                          "helperDotVerticalInPos: $helperDotVerticalInPos",
-                          style: const TextStyle(color: Colors.white),
+                          "helperDotHorizontalReach + degreesPerPhotos: $helperDotHorizontalReach + $degreesPerPhotos = ${helperDotHorizontalReach! + degreesPerPhotos}",
+                          style: const TextStyle(
+                              color: Colors.white,
+                              backgroundColor: Colors.black),
                         ),
                         Text(
-                          "helperDotIsHorizontalInPos: $helperDotIsHorizontalInPos",
-                          style: const TextStyle(color: Colors.white),
+                          "lastPhoto/lastPhotoTaken: $lastPhoto / $lastPhotoTaken",
+                          style: const TextStyle(
+                              color: Colors.white,
+                              backgroundColor: Colors.black),
                         ),
                         Text(
-                          "isDeviceRotationCorrect: $isDeviceRotationCorrect",
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                        Text(
-                          "nrPhotosTaken: $nrPhotosTaken",
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                        Text(
-                          "goBackDegrees: $goBackDegrees",
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                        Text(
-                          "deviceHorizontalDegInitial: $deviceHorizontalDegInitial",
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                        Text(
-                          "deviceHorizontalDegManipulated: ${deviceHorizontalDegManipulated.toStringAsFixed(2)}",
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                        Text(
-                          "helperDotPosX: ${helperDotPosX.toStringAsFixed(2)}",
-                          style: const TextStyle(color: Colors.white),
+                          "lastSuccessHorizontalPosition: $lastSuccessHorizontalPosition",
+                          style: const TextStyle(
+                              color: Colors.white,
+                              backgroundColor: Colors.black),
                         ),
                         Text(
                           "helperDotHorizontalReach: $helperDotHorizontalReach",
-                          style: const TextStyle(color: Colors.white),
+                          style: const TextStyle(
+                              color: Colors.white,
+                              backgroundColor: Colors.black),
                         ),
                         Text(
-                          "rightRanges: ${rightRanges.toString()}",
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                        Text(
-                          "lastSuccessHorizontalPosition: ${lastSuccessHorizontalPosition.toString()}",
-                          style: const TextStyle(color: Colors.white),
+                          "deviceHorizontalDegManipulated: ${deviceHorizontalDegManipulated.toStringAsFixed(2)}",
+                          style: const TextStyle(
+                              color: Colors.white,
+                              backgroundColor: Colors.black),
                         ),
                         Text(
                           "hasStitchingFailed: ${hasStitchingFailed.toString()}",
-                          style: const TextStyle(color: Colors.white),
+                          style: const TextStyle(
+                              color: Colors.white,
+                              backgroundColor: Colors.black),
                         ),
                       ],
                     ),
