@@ -23,17 +23,19 @@ class Camera extends StatefulWidget {
   final int? userNrPhotos;
   final int? userCapturedImageWidth;
   final int? userCapturedImageQuality;
+  final String? userLoadingText;
   final double? userDeviceVerticalCorrectDeg;
 
   const Camera({
     Key? key,
     required this.onCaptureEnded,
     this.onCameraChanged,
-    this.userSelectedCameraKey = 0,
-    this.userNrPhotos = 16,
-    this.userCapturedImageWidth = 1500,
-    this.userCapturedImageQuality = 50,
-    this.userDeviceVerticalCorrectDeg = 75,
+    this.userSelectedCameraKey,
+    this.userNrPhotos,
+    this.userCapturedImageWidth,
+    this.userCapturedImageQuality,
+    this.userDeviceVerticalCorrectDeg,
+    this.userLoadingText,
   }) : super(key: key);
 
   @override
@@ -85,6 +87,7 @@ class _CameraState extends State<Camera> {
   bool takingPicture = false;
   bool hasStitchingFailed = false;
   int selectedCameraKey = 0;
+  String loadingText = "";
 
   int nrPhotosTaken = 0;
   late XFile testStichingImage; // Stitched panorama image
@@ -107,6 +110,7 @@ class _CameraState extends State<Camera> {
     goBackDegrees = (20 * degreesPerPhotos / 100) * -1; // 20% back
     degToNextPosition = 360 / nrPhotos;
     selectedCameraKey = widget.userSelectedCameraKey ?? 0;
+    loadingText = widget.userLoadingText ?? 'Preparing panorama...';
 
     _setupSensors();
     _setupCameras();
@@ -314,9 +318,9 @@ class _CameraState extends State<Camera> {
       helperDotHorizontalReach = (helperDotHorizontalReach! - 360);
     }
 
+    // If user is moving back and it has reached the previous success position
+    // than it means the stitching has failed on that part of the surface
     if (helperDotHorizontalReach! <= lastSuccessHorizontalPosition) {
-      debugPrint(
-          "Stitching failed because: helperDotHorizontalReach:${helperDotHorizontalReach} <= lastSuccessHorizontalPosition:${lastSuccessHorizontalPosition}");
       stitchingFailed();
     }
   }
@@ -482,56 +486,54 @@ class _CameraState extends State<Camera> {
     };
 
     widget.onCaptureEnded(returnedData);
+
+    // After panorama stitching has failed or succeeded then restart the app
+    restartApp();
   }
 
-  // Check if can take more photos
-  bool canTakeMorePhotos() {
-    if (lastPhoto == true && lastPhotoTaken == true) {
-      return false;
-    }
+  Future<void> prepareFinalPanorama() async {
+    // Download image
+    if (imageSaved == false) {
+      imageSaved = true;
+      if (isPanoramaBeingStitched == false) {
+        isPanoramaBeingStitched = true;
 
-    if (lastPhoto == true) {
-      lastPhotoTaken = true;
-      // Download image
-      if (imageSaved == false) {
-        imageSaved = true;
-        if (isPanoramaBeingStitched == false) {
-          isPanoramaBeingStitched = true;
+        stitchImages(capturedImages, true).then((value) {
+          finalStitchedImage = value;
+          isPanoramaBeingStitched = false;
 
-          stitchImages(capturedImages, true).then((value) {
-            finalStitchedImage = value;
-            isPanoramaBeingStitched = false;
+          // Delete panorama images
+          deletePanoramaImages();
 
-            // Delete panorama images
-            deletePanoramaImages();
+          // Callback function
+          prepareOnCaptureEnded(finalStitchedImage);
 
-            // Callback function
-            prepareOnCaptureEnded(finalStitchedImage);
+          GallerySaver.saveImage(finalStitchedImage.path);
+        }).onError((error, stackTrace) {
+          stitchingFailed();
 
-            GallerySaver.saveImage(finalStitchedImage.path);
-          }).onError((error, stackTrace) {
-            stitchingFailed();
-
-            // Callback function
-            prepareOnCaptureEnded(null);
-            print("Stitching failed");
-          });
-        }
+          // Callback function
+          prepareOnCaptureEnded(null);
+          print("Stitching failed");
+        });
       }
-
-      return false;
     }
-
-    if (helperDotHorizontalReach! + degreesPerPhotos >= 360) {
-      lastPhoto = true;
-    }
-
-    return true;
   }
 
-  // Check if ready to take photo
+  // Check if more photos are needed to complete a 360 deg panorama
+  bool morePhotosNeeded() {
+    // If next (to reach) horizontal position is <= 360 then allow to take more photos
+    if (helperDotHorizontalReach! <= 360) {
+      return true;
+    }
+
+    return false;
+  }
+
+  // Check if mobile is in position and app is ready to take photo
   bool readyToTakePhoto() {
-    return deviceInCorrectPosition &&
+    return morePhotosNeeded() &&
+        deviceInCorrectPosition &&
         takingPicture == false &&
         hasStitchingFailed == false;
   }
@@ -676,60 +678,18 @@ class _CameraState extends State<Camera> {
         var helperDotColor =
             isDeviceRotationCorrect == true ? Colors.white : Colors.red;
 
+        // If no more photos are needed than it's time to stitch the final panorama
+        if (morePhotosNeeded() == false) {
+          prepareFinalPanorama();
+        }
+
         return Container(
           color: Colors.black,
-          child: canTakeMorePhotos()
+          child: morePhotosNeeded()
               ? Stack(
                   children: [
                     Center(
                       child: CameraPreview(controller),
-                    ),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Text(
-                          "nrPhotos/taken: $nrPhotos / $nrPhotosTaken",
-                          style: const TextStyle(
-                              color: Colors.white,
-                              backgroundColor: Colors.black),
-                        ),
-                        Text(
-                          "helperDotHorizontalReach + degreesPerPhotos: $helperDotHorizontalReach + $degreesPerPhotos = ${helperDotHorizontalReach! + degreesPerPhotos}",
-                          style: const TextStyle(
-                              color: Colors.white,
-                              backgroundColor: Colors.black),
-                        ),
-                        Text(
-                          "lastPhoto/lastPhotoTaken: $lastPhoto / $lastPhotoTaken",
-                          style: const TextStyle(
-                              color: Colors.white,
-                              backgroundColor: Colors.black),
-                        ),
-                        Text(
-                          "lastSuccessHorizontalPosition: $lastSuccessHorizontalPosition",
-                          style: const TextStyle(
-                              color: Colors.white,
-                              backgroundColor: Colors.black),
-                        ),
-                        Text(
-                          "helperDotHorizontalReach: $helperDotHorizontalReach",
-                          style: const TextStyle(
-                              color: Colors.white,
-                              backgroundColor: Colors.black),
-                        ),
-                        Text(
-                          "deviceHorizontalDegManipulated: ${deviceHorizontalDegManipulated.toStringAsFixed(2)}",
-                          style: const TextStyle(
-                              color: Colors.white,
-                              backgroundColor: Colors.black),
-                        ),
-                        Text(
-                          "hasStitchingFailed: ${hasStitchingFailed.toString()}",
-                          style: const TextStyle(
-                              color: Colors.white,
-                              backgroundColor: Colors.black),
-                        ),
-                      ],
                     ),
                     Column(
                       mainAxisAlignment: MainAxisAlignment.end,
@@ -757,12 +717,6 @@ class _CameraState extends State<Camera> {
                         ElevatedButton(
                             onPressed: () => restartApp(),
                             child: const Text("reset")),
-                        nrPhotosTaken >= 1
-                            ? Center(
-                                child: Image.file(File(testStichingImage.path),
-                                    height: 100),
-                              )
-                            : Container()
                       ],
                     ),
                     // Helper dot
@@ -794,25 +748,11 @@ class _CameraState extends State<Camera> {
                   ],
                 )
               : Center(
-                  child: isPanoramaBeingStitched
-                      ? hasStitchingFailed
-                          ? const Text(
-                              'Stitching failed',
-                              style: TextStyle(color: Colors.white),
-                            )
-                          : const Text(
-                              'Preparing panorama...',
-                              style: TextStyle(color: Colors.white),
-                            )
-                      : Column(
-                          children: [
-                            Image.file(File(finalStitchedImage.path),
-                                height: 200),
-                            ElevatedButton(
-                                onPressed: () => restartApp(),
-                                child: const Text("reset")),
-                          ],
-                        )),
+                  child: Text(
+                    loadingText,
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ),
         );
       },
     );
