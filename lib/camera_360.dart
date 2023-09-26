@@ -72,6 +72,8 @@ class _CameraState extends State<Camera> {
   late int nrPhotos;
   late double degreesPerPhotos;
   late double goBackDegrees;
+  int nrGoBacksDone = 0;
+  int nrGoBacksAllowed = 5;
   late double degToNextPosition;
 
   // VARIABLES
@@ -80,7 +82,7 @@ class _CameraState extends State<Camera> {
   double horizontalMovementNeeded = 0;
   double lastSuccessHorizontalPosition = 0; // H Deg on last success image taken
   bool helperDotIsHorizontalInPos = false;
-  double? helperDotHorizontalReach;
+  double helperDotHorizontalReach = 0;
   List rightRanges = [];
   double? deviceHorizontalDegInitial;
   bool deviceInCorrectPosition = false;
@@ -107,7 +109,9 @@ class _CameraState extends State<Camera> {
     capturedImageQuality = widget.userCapturedImageQuality ?? 50;
     nrPhotos = widget.userNrPhotos ?? 16;
     degreesPerPhotos = 360 / nrPhotos;
-    goBackDegrees = (20 * degreesPerPhotos / 100) * -1; // 20% back
+    goBackDegrees = (degreesPerPhotos / nrGoBacksAllowed) * -1; // 20% back
+    nrGoBacksAllowed = 5;
+    nrGoBacksDone = 0;
     degToNextPosition = 360 / nrPhotos;
     selectedCameraKey = widget.userSelectedCameraKey ?? 0;
     loadingText = widget.userLoadingText ?? 'Preparing panorama...';
@@ -127,7 +131,7 @@ class _CameraState extends State<Camera> {
           0; // This value will be updated with the deg the phone must move horizontally
       lastSuccessHorizontalPosition = 0; // H Deg on last success image taken
       helperDotIsHorizontalInPos = false;
-      helperDotHorizontalReach = null;
+      helperDotHorizontalReach = 0;
       rightRanges = [];
       deviceHorizontalDegInitial = null;
       deviceInCorrectPosition = false;
@@ -138,6 +142,7 @@ class _CameraState extends State<Camera> {
       isPanoramaBeingStitched = false;
       lastPhoto = false;
       lastPhotoTaken = false;
+      nrGoBacksDone = 0;
     });
   }
 
@@ -220,7 +225,7 @@ class _CameraState extends State<Camera> {
   void prepareForNextImageCatpure([double? degToNextPositionOverwrite]) {
     // If picture is taken then degToNextPositionOverwrite is null
     if (degToNextPositionOverwrite == null) {
-      lastSuccessHorizontalPosition = helperDotHorizontalReach!;
+      lastSuccessHorizontalPosition = helperDotHorizontalReach;
     }
 
     // If degToNextPositionOverwrite is not set then is equal to degToNextPosition
@@ -228,7 +233,7 @@ class _CameraState extends State<Camera> {
     // Move the helper to the next position
     _moveHelperDotToNextPosition(degToNextPositionOverwrite);
     // Generate right Ranges again
-    rightRanges = generateRightRanges(helperDotHorizontalReach!);
+    rightRanges = generateRightRanges(helperDotHorizontalReach);
     // Allow to take pictures again
     takingPicture = false;
   }
@@ -282,12 +287,14 @@ class _CameraState extends State<Camera> {
 
         stitchImages(toStitch, false).then((value) {
           testStichingImage = value;
+          nrGoBacksDone = 0;
           prepareForNextImageCatpure();
         }).onError((error, stackTrace) async {
           print(error.toString());
           // Delete last taken image
           await removeLastCapturedImage();
           // Move the helperDot back
+          nrGoBacksDone++;
           prepareForNextImageCatpure(goBackDegrees);
 
           // Update nrPhotosTaken
@@ -312,15 +319,18 @@ class _CameraState extends State<Camera> {
     // If degToNextPositionOverwrite is not set then is equal to degToNextPosition
     degToNextPositionOverwrite ??= degToNextPosition;
 
+    // Move helperDotHorizontalReach to the next position
     helperDotHorizontalReach =
-        (helperDotHorizontalReach! + degToNextPositionOverwrite);
-    if (helperDotHorizontalReach! > 360) {
-      helperDotHorizontalReach = (helperDotHorizontalReach! - 360);
+        (helperDotHorizontalReach + degToNextPositionOverwrite);
+
+    // Update helperDotHorizontalReach so that its always 0-360deg
+    if (helperDotHorizontalReach > 360) {
+      helperDotHorizontalReach = (helperDotHorizontalReach - 360);
     }
 
     // If user is moving back and it has reached the previous success position
     // than it means the stitching has failed on that part of the surface
-    if (helperDotHorizontalReach! <= lastSuccessHorizontalPosition) {
+    if (nrGoBacksDone == nrGoBacksAllowed) {
       stitchingFailed();
     }
   }
@@ -408,7 +418,7 @@ class _CameraState extends State<Camera> {
       // The dotHelper should be on the left
       // Calculate how much I should move
       horizontalMovementNeeded = deviceHorizontalDegManipulated -
-          (helperDotHorizontalReach! - helperDotHorizontalTolerance);
+          (helperDotHorizontalReach - helperDotHorizontalTolerance);
 
       helperDotPosX = (containerWidth / 2) -
           (centeredDotRadius / 2) -
@@ -432,7 +442,7 @@ class _CameraState extends State<Camera> {
       // The dotHelper should be on the right
       // Calculate how much I should move
       horizontalMovementNeeded =
-          (helperDotHorizontalReach! - helperDotHorizontalTolerance) -
+          (helperDotHorizontalReach - helperDotHorizontalTolerance) -
               deviceHorizontalDegManipulated;
 
       helperDotPosX = (containerWidth / 2) -
@@ -453,9 +463,9 @@ class _CameraState extends State<Camera> {
 
     // CHECK HELPER DOT HORIZONTAL POSITION
     if ((deviceHorizontalDegManipulated <
-            (helperDotHorizontalReach! - helperDotHorizontalTolerance)) ||
+            (helperDotHorizontalReach - helperDotHorizontalTolerance)) ||
         (deviceHorizontalDegManipulated >
-            (helperDotHorizontalReach! + helperDotHorizontalTolerance))) {
+            (helperDotHorizontalReach + helperDotHorizontalTolerance))) {
       helperDotIsHorizontalInPos = false;
     } else {
       helperDotIsHorizontalInPos = true;
@@ -523,11 +533,20 @@ class _CameraState extends State<Camera> {
   // Check if more photos are needed to complete a 360 deg panorama
   bool morePhotosNeeded() {
     // If next (to reach) horizontal position is <= 360 then allow to take more photos
-    if (helperDotHorizontalReach! <= 360) {
-      return true;
+    // Last photo should be as close as possible to 360 DEG
+
+    // The last photo taken will be at 360deg or more then 360 deg, but not less
+    if (nrPhotosTaken >= nrPhotos &&
+        (lastSuccessHorizontalPosition == 360 ||
+            lastSuccessHorizontalPosition <= degToNextPosition)) {
+      return false;
     }
 
-    return false;
+    // if (lastSuccessHorizontalPosition == 360) {
+    //   return false;
+    // }
+
+    return true;
   }
 
   // Check if mobile is in position and app is ready to take photo
@@ -635,8 +654,6 @@ class _CameraState extends State<Camera> {
     // Manipulate deg starting from 0
     double deviceHorizontalDegManipulated = calculateDegreesFromZero(
         deviceHorizontalDegInitial ?? 0, deviceHorizontalDeg);
-    // Set default helperDotHorizontalReach
-    helperDotHorizontalReach ??= deviceHorizontalDegManipulated;
 
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
@@ -662,7 +679,7 @@ class _CameraState extends State<Camera> {
             isDeviceRotationCorrect == true);
 
         // Generate right ranges
-        rightRanges = generateRightRanges(helperDotHorizontalReach!);
+        rightRanges = generateRightRanges(helperDotHorizontalReach);
 
         // Take picture
         if (readyToTakePhoto()) {
