@@ -3,6 +3,8 @@ PODS:
     - Flutter
   - camera_avfoundation (0.0.1):
     - Flutter
+  - device_info_plus (0.0.1):
+    - Flutter
   - Flutter (1.0.0)
   - flutter_native_image (0.0.1):
     - Flutter
@@ -23,6 +25,7 @@ PODS:
 DEPENDENCIES:
   - camera_360 (from `.symlinks/plugins/camera_360/ios`)
   - camera_avfoundation (from `.symlinks/plugins/camera_avfoundation/ios`)
+  - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - Flutter (from `Flutter`)
   - flutter_native_image (from `.symlinks/plugins/flutter_native_image/ios`)
   - gallery_saver (from `.symlinks/plugins/gallery_saver/ios`)
@@ -37,6 +40,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/camera_360/ios"
   camera_avfoundation:
     :path: ".symlinks/plugins/camera_avfoundation/ios"
+  device_info_plus:
+    :path: ".symlinks/plugins/device_info_plus/ios"
   Flutter:
     :path: Flutter
   flutter_native_image:
@@ -57,6 +62,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   camera_360: 21dbcc767560facc8acbc16f29789fd5fd99c9a6
   camera_avfoundation: 3125e8cd1a4387f6f31c6c63abb8a55892a9eeeb
+  device_info_plus: 7545d84d8d1b896cb16a4ff98c19f07ec4b298ea
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
   flutter_native_image: 9c0b7451838484458e5b0fae007b86a4c2d4bdfe
   gallery_saver: 9fc173c9f4fcc48af53b2a9ebea1b643255be542

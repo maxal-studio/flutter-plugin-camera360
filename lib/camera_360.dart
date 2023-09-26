@@ -1,3 +1,4 @@
+import 'package:camera_360/includes/device_info.dart';
 import 'package:camera_360/layouts/device_rotation.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
@@ -99,9 +100,17 @@ class _CameraState extends State<Camera> {
   bool lastPhoto = false;
   bool lastPhotoTaken = false;
 
+  // Device
+  late Map<String?, String?> deviceInfo;
+
   @override
   void initState() {
     super.initState();
+
+    DeviceInfo().get().then((value) {
+      deviceInfo = value;
+      debugPrint(deviceInfo['platform']);
+    });
 
     // Updating System Variables depending on User Variables
     deviceVerticalCorrectDeg = widget.userDeviceVerticalCorrectDeg ?? 75;
@@ -708,6 +717,16 @@ class _CameraState extends State<Camera> {
                     Center(
                       child: CameraPreview(controller),
                     ),
+                    Column(children: [
+                      Text(
+                        "Platform: ${deviceInfo['platform']}",
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                      Text(
+                        "Model: ${deviceInfo['model']}",
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ]),
                     Column(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
