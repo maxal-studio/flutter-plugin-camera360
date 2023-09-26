@@ -11,7 +11,7 @@ import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
-import 'package:wakelock/wakelock.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 import 'camera_360_bindings_generated.dart';
 
@@ -290,7 +290,7 @@ class _CameraState extends State<Camera> {
           nrGoBacksDone = 0;
           prepareForNextImageCatpure();
         }).onError((error, stackTrace) async {
-          print(error.toString());
+          debugPrint(error.toString());
           // Delete last taken image
           await removeLastCapturedImage();
           // Move the helperDot back
@@ -524,7 +524,7 @@ class _CameraState extends State<Camera> {
 
           // Callback function
           prepareOnCaptureEnded(null);
-          print("Stitching failed");
+          debugPrint("Stitching failed");
         });
       }
     }
@@ -573,12 +573,12 @@ class _CameraState extends State<Camera> {
     debugPrint(imagePaths.toString());
 
     // Bindings
-    final Camera360Bindings _bindings = Camera360Bindings(dylib);
+    final Camera360Bindings bindings = Camera360Bindings(dylib);
 
     String dirpath =
         "${(await getApplicationDocumentsDirectory()).path}/stitched-panorama-${DateTime.now().millisecondsSinceEpoch}.jpg";
 
-    bool isStiched = _bindings.stitch(
+    bool isStiched = bindings.stitch(
         imagePaths.toString().toNativeUtf8() as Pointer<Char>,
         dirpath.toNativeUtf8() as Pointer<Char>,
         cropped);
@@ -626,7 +626,7 @@ class _CameraState extends State<Camera> {
   @override
   void dispose() {
     // Disable screen always on
-    Wakelock.disable();
+    WakelockPlus.disable();
     controller.dispose();
     for (StreamSubscription<dynamic> subscription in _streamSubscriptions) {
       subscription.cancel();
@@ -641,7 +641,7 @@ class _CameraState extends State<Camera> {
     if (!_isReady) return Container();
 
     // Kepp the screen on
-    Wakelock.enable();
+    WakelockPlus.enable();
 
     double deviceVerticalDeg =
         double.parse(degrees(_absoluteOrientation.y).toStringAsFixed(1));

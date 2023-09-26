@@ -28,7 +28,7 @@ class _MyAppState extends State<MyApp> {
         appBar: AppBar(
           title: const Text('360 Camera App'),
         ),
-        body: CameraPage(),
+        body: const CameraPage(),
       ),
     );
   }
@@ -57,7 +57,7 @@ class _CameraPageState extends State<CameraPage> {
           userSelectedCameraKey: 0,
           onCaptureEnded: (data) {
             if (data['success'] == true) {
-              XFile panorama = data['panorama'];
+              // XFile panorama = data['panorama'];
               displayPanoramaMessage(context, 'Panorama saved!');
             } else {
               displayPanoramaMessage(context, 'Panorama failed!');
