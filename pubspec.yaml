@@ -13,7 +13,6 @@ dependencies:
     sdk: flutter
   plugin_platform_interface: ^2.0.2
   camera: ^0.10.5+2
-  sensors_plus: ^3.0.2
   motion_sensors: 
     git:
       url: https://github.com/zesage/motion_sensors.git
