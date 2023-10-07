@@ -42,6 +42,8 @@ class CameraPage extends StatefulWidget {
 }
 
 class _CameraPageState extends State<CameraPage> {
+  int progressPecentage = 0;
+
   @override
   Widget build(BuildContext context) {
     void displayPanoramaMessage(context, String message) {
@@ -54,19 +56,34 @@ class _CameraPageState extends State<CameraPage> {
     return Stack(
       children: [
         Camera(
-          userSelectedCameraKey: 0,
-          onCaptureEnded: (data) {
-            if (data['success'] == true) {
-              XFile panorama = data['panorama'];
-              displayPanoramaMessage(context, 'Panorama saved!');
-            } else {
-              displayPanoramaMessage(context, 'Panorama failed!');
-            }
-          },
-          onCameraChanged: (cameraKey) {
-            displayPanoramaMessage(
-                context, "Camera changed ${cameraKey.toString()}");
-          },
+            userSelectedCameraKey: 0,
+            onCaptureEnded: (data) {
+              if (data['success'] == true) {
+                XFile panorama = data['panorama'];
+                displayPanoramaMessage(context, 'Panorama saved!');
+              } else {
+                displayPanoramaMessage(context, 'Panorama failed!');
+              }
+            },
+            onCameraChanged: (cameraKey) {
+              displayPanoramaMessage(
+                  context, "Camera changed ${cameraKey.toString()}");
+            },
+            onProgressChanged: (newProgressPecentage) {
+              debugPrint("Progress changed: $newProgressPecentage");
+              setState(() {
+                progressPecentage = newProgressPecentage;
+              });
+            }),
+        Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Text(
+              "Progress: $progressPecentage",
+              style: const TextStyle(
+                  color: Colors.white, backgroundColor: Colors.black),
+            )
+          ],
         ),
       ],
     );
