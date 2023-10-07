@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 
 import 'package:image_picker/image_picker.dart';
+import 'package:gallery_saver/gallery_saver.dart';
 
 void main() {
   runApp(const MyApp());
@@ -59,7 +60,9 @@ class _CameraPageState extends State<CameraPage> {
             userSelectedCameraKey: 0,
             onCaptureEnded: (data) {
               if (data['success'] == true) {
+                // Save image to the gallery
                 XFile panorama = data['panorama'];
+                GallerySaver.saveImage(panorama.path);
                 displayPanoramaMessage(context, 'Panorama saved!');
               } else {
                 displayPanoramaMessage(context, 'Panorama failed!');
