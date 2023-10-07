@@ -55,7 +55,7 @@ class _CameraPageState extends State<CameraPage> {
 
     return Stack(
       children: [
-        Camera(
+        Camera360(
             userSelectedCameraKey: 0,
             onCaptureEnded: (data) {
               if (data['success'] == true) {

@@ -15,8 +15,8 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 
 import 'camera_360_bindings_generated.dart';
 
-class Camera extends StatefulWidget {
-  // const Camera({super.key});
+class Camera360 extends StatefulWidget {
+  // const Camera360({super.key});
   final void Function(Map<String, dynamic>) onCaptureEnded;
   final void Function(int)? onCameraChanged;
   final void Function(int)? onProgressChanged;
@@ -27,7 +27,7 @@ class Camera extends StatefulWidget {
   final String? userLoadingText;
   final double? userDeviceVerticalCorrectDeg;
 
-  const Camera({
+  const Camera360({
     Key? key,
     required this.onCaptureEnded,
     this.onCameraChanged,
@@ -41,12 +41,12 @@ class Camera extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<Camera> createState() => _CameraState();
+  State<Camera360> createState() => _Camera360State();
 }
 
 // THE STATE IS BEING UPDATED EVERY SET SECONDS
 // The state is updated by this function _setupSensors
-class _CameraState extends State<Camera> {
+class _Camera360State extends State<Camera360> {
   late List<CameraDescription> cameras;
   late CameraController controller;
   bool _isReady = false;
