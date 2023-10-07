@@ -214,7 +214,8 @@ class _Camera360State extends State<Camera360> {
     // Change the camera
     try {
       // initialize camera controllers.
-      controller = CameraController(description, ResolutionPreset.high);
+      controller = CameraController(description, ResolutionPreset.high,
+          enableAudio: false, imageFormatGroup: ImageFormatGroup.jpeg);
       await controller.initialize();
     } on CameraException catch (_) {
       // do something on error.
