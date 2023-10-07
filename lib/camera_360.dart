@@ -11,7 +11,7 @@ import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
-import 'package:wakelock/wakelock.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 import 'camera_360_bindings_generated.dart';
 
@@ -19,6 +19,7 @@ class Camera extends StatefulWidget {
   // const Camera({super.key});
   final void Function(Map<String, dynamic>) onCaptureEnded;
   final void Function(int)? onCameraChanged;
+  final void Function(int)? onProgressChanged;
   final int? userSelectedCameraKey;
   final int? userNrPhotos;
   final int? userCapturedImageWidth;
@@ -30,6 +31,7 @@ class Camera extends StatefulWidget {
     Key? key,
     required this.onCaptureEnded,
     this.onCameraChanged,
+    this.onProgressChanged,
     this.userSelectedCameraKey,
     this.userNrPhotos,
     this.userCapturedImageWidth,
@@ -80,6 +82,7 @@ class _CameraState extends State<Camera> {
   List<XFile> capturedImages = [];
   // This value will be updated with the deg the phone must move horizontally
   double horizontalMovementNeeded = 0;
+  int progressPercentage = 0;
   double lastSuccessHorizontalPosition = 0; // H Deg on last success image taken
   bool helperDotIsHorizontalInPos = false;
   double helperDotHorizontalReach = 0;
@@ -143,6 +146,8 @@ class _CameraState extends State<Camera> {
       lastPhoto = false;
       lastPhotoTaken = false;
       nrGoBacksDone = 0;
+
+      updateProgress();
     });
   }
 
@@ -225,7 +230,7 @@ class _CameraState extends State<Camera> {
   void prepareForNextImageCatpure([double? degToNextPositionOverwrite]) {
     // If picture is taken then degToNextPositionOverwrite is null
     if (degToNextPositionOverwrite == null) {
-      lastSuccessHorizontalPosition = helperDotHorizontalReach;
+      updateSuccessHorizontalPosition(helperDotHorizontalReach);
     }
 
     // If degToNextPositionOverwrite is not set then is equal to degToNextPosition
@@ -290,7 +295,7 @@ class _CameraState extends State<Camera> {
           nrGoBacksDone = 0;
           prepareForNextImageCatpure();
         }).onError((error, stackTrace) async {
-          print(error.toString());
+          debugPrint(error.toString());
           // Delete last taken image
           await removeLastCapturedImage();
           // Move the helperDot back
@@ -326,6 +331,10 @@ class _CameraState extends State<Camera> {
     // Update helperDotHorizontalReach so that its always 0-360deg
     if (helperDotHorizontalReach > 360) {
       helperDotHorizontalReach = (helperDotHorizontalReach - 360);
+    }
+
+    if (morePhotosNeeded()) {
+      updateProgress();
     }
 
     // If user is moving back and it has reached the previous success position
@@ -524,7 +533,7 @@ class _CameraState extends State<Camera> {
 
           // Callback function
           prepareOnCaptureEnded(null);
-          print("Stitching failed");
+          debugPrint("Stitching failed");
         });
       }
     }
@@ -608,6 +617,30 @@ class _CameraState extends State<Camera> {
     });
   }
 
+  // Update last success horizontal position
+  double updateSuccessHorizontalPosition(value) {
+    lastSuccessHorizontalPosition = value;
+
+    return lastSuccessHorizontalPosition;
+  }
+
+  // On progress updated
+  void updateProgress() {
+    int newProgressPercentage = (helperDotHorizontalReach * 100 / 360).round();
+    if (newProgressPercentage > 100 ||
+        (nrPhotosTaken >= nrPhotos &&
+            helperDotHorizontalReach <= degToNextPosition)) {
+      newProgressPercentage = 100;
+    }
+
+    // Check if newProgressPercentage is different from old saved one
+    if (newProgressPercentage != progressPercentage) {
+      progressPercentage = newProgressPercentage;
+      // Inform that camera has changed
+      widget.onProgressChanged?.call(progressPercentage);
+    }
+  }
+
   // Calculate currentDeg as starting from 0
   double calculateDegreesFromZero(double initialDeg, double currentDeg) {
     double calculatedDeg = currentDeg;
@@ -626,7 +659,7 @@ class _CameraState extends State<Camera> {
   @override
   void dispose() {
     // Disable screen always on
-    Wakelock.disable();
+    WakelockPlus.disable();
     controller.dispose();
     for (StreamSubscription<dynamic> subscription in _streamSubscriptions) {
       subscription.cancel();
@@ -641,7 +674,7 @@ class _CameraState extends State<Camera> {
     if (!_isReady) return Container();
 
     // Kepp the screen on
-    Wakelock.enable();
+    WakelockPlus.enable();
 
     double deviceVerticalDeg =
         double.parse(degrees(_absoluteOrientation.y).toStringAsFixed(1));
