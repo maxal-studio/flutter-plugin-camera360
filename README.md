@@ -33,8 +33,9 @@ minSdkVersion 21
 
 ### Dart
 ```dart
+import 'package:camera_360/camera_360.dart';
 import 'package:image_picker/image_picker.dart';
-Camera(
+Camera360(
     userSelectedCameraKey: 2,
     onCaptureEnded: (data) {
       // Returned data will be a map like below
@@ -56,6 +57,9 @@ Camera(
     onCameraChanged: (cameraKey) {
       print("Camera changed ${cameraKey.toString()}");
     },
+    onProgressChanged: (newProgressPecentage) {
+      debugPrint("Progress changed: $newProgressPecentage");
+    }),
 ),
 ```
 
