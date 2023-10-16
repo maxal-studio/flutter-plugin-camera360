@@ -39,7 +39,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "0.0.1"
+    version: "0.0.2"
   camera_android:
     dependency: transitive
     description:
@@ -346,11 +346,10 @@ packages:
   motion_sensors:
     dependency: transitive
     description:
-      path: "."
-      ref: HEAD
-      resolved-ref: "64230e30a5022acb1c7e3a20ee51a9da588c7b9f"
-      url: "https://github.com/zesage/motion_sensors.git"
-    source: git
+      name: motion_sensors
+      sha256: "4e2734a76cd6da633013bcdc68a9efe9fbbcff906e6d6c45040932edda3fa5d6"
+      url: "https://pub.dev"
+    source: hosted
     version: "0.1.0"
   package_info_plus:
     dependency: transitive
