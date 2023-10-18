@@ -73,7 +73,7 @@ bool cropWithMat(const cv::Mat src, cv::Mat &dest)
 
         if (isTopNotBlack && isLeftNotBlack && isBottomNotBlack && isRightNotBlack)
         {
-            printf("%d %d %d %d \n", roiRect.x, roiRect.y, roiRect.width, roiRect.height);
+            printf("'Stitcher': Cropped coordinates %d %d %d %d \n", roiRect.x, roiRect.y, roiRect.width, roiRect.height);
 
             cv::Mat imageReference = src(roiRect);
             imageReference.copyTo(dest);
@@ -102,7 +102,7 @@ bool cropWithMat(const cv::Mat src, cv::Mat &dest)
         }
         if (roiRect.width <= 0 || roiRect.height <= 0)
         {
-            printf("Cropping failed");
+            printf("'Stitcher': Cropping failed");
             return false;
         }
     }
@@ -148,11 +148,11 @@ Mat process_stitching(vector<Mat> imgVec)
     if (status != Stitcher::OK)
     {
         // hconcat(imgVec, result);
-        printf("Stitching error: %d\n", status);
+        printf("'Stitcher': Stitching error: %d\n", status);
         return Mat();
     }
 
-    printf("Stitching success here\n");
+    printf("'Stitcher': Stitching success here\n");
     cvtColor(result, result, COLOR_RGB2BGR);
     return result;
 }
@@ -160,10 +160,18 @@ Mat process_stitching(vector<Mat> imgVec)
 vector<Mat> convert_to_matlist(vector<string> img_list, bool isvertical)
 {
     vector<Mat> imgVec;
+    bool images_exist = true;
     for (auto k = img_list.begin(); k != img_list.end(); ++k)
     {
         String path = *k;
         Mat input = imread(path);
+        // Check if image exists
+        if (input.empty())
+        {
+            images_exist = false;
+            break;
+        }
+
         Mat newimage;
         // Convert to a 3 channel Mat to use with Stitcher module
         cvtColor(input, newimage, COLOR_BGR2RGB, 3);
@@ -174,6 +182,11 @@ vector<Mat> convert_to_matlist(vector<string> img_list, bool isvertical)
             rotate(newimage, newimage, ROTATE_90_COUNTERCLOCKWISE);
         imgVec.push_back(newimage);
     }
+    if (images_exist == false)
+    {
+        vector<Mat> emptyVector;
+        return emptyVector;
+    }
     return imgVec;
 }
 
@@ -183,6 +196,14 @@ bool stitch(char *inputImagePath, char *outputImagePath, bool cropped)
     vector<string> image_vector_list = getpathlist(input_path_string);
     vector<Mat> mat_list;
     mat_list = convert_to_matlist(image_vector_list, false);
+    // Check if stitching failed
+    if (mat_list.empty())
+    {
+        // Stitching failed because some images didn't exist
+        printf("'Stitcher': Stitching failed because some images didn't exist\n");
+        return false;
+    }
+    // Process stitching
     Mat result = process_stitching(mat_list);
 
     // Check if stitching failed
@@ -198,12 +219,12 @@ bool stitch(char *inputImagePath, char *outputImagePath, bool cropped)
         if (cropWithMat(result, withoutBlackBg) == true)
         {
             imwrite(outputImagePath, withoutBlackBg);
-            printf("Image cropped successfully\n");
+            printf("'Stitcher': Image cropped successfully\n");
             return true;
         }
         else
         {
-            printf("Image cropping failed\n");
+            printf("'Stitcher': Image cropping failed\n");
             return false;
         }
     }

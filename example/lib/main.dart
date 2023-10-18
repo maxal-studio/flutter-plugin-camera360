@@ -67,6 +67,7 @@ class _CameraPageState extends State<CameraPage> {
               } else {
                 displayPanoramaMessage(context, 'Panorama failed!');
               }
+              print(data);
             },
             onCameraChanged: (cameraKey) {
               displayPanoramaMessage(
