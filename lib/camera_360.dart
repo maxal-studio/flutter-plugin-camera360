@@ -123,8 +123,8 @@ class _Camera360State extends State<Camera360> {
   }
 
   // Reset Main
-  Future<void> restartApp() async {
-    debugPrint("Restarting app");
+  Future<void> restartApp({String? reason}) async {
+    debugPrint("'Panorama360': Restarting app reason: $reason");
 
     // Delete all images
     await deletePanoramaImages().whenComplete(() {
@@ -158,7 +158,7 @@ class _Camera360State extends State<Camera360> {
       }
     } catch (e) {
       // Error in getting access to the file.
-      debugPrint("Failed Deleting panorama image");
+      debugPrint("'Panorama360': Failed Deleting panorama image");
     }
 
     // Remove from list
@@ -174,7 +174,8 @@ class _Camera360State extends State<Camera360> {
         }
       } catch (e) {
         // Error in getting access to the file.
-        debugPrint("Failed Deleting panorama images");
+        debugPrint(
+            "'Panorama360': Failed Deleting panorama image: ${capturedImage.path}");
       }
     }
   }
@@ -507,7 +508,7 @@ class _Camera360State extends State<Camera360> {
     widget.onCaptureEnded(returnedData);
 
     // After panorama stitching has failed or succeeded then restart the app
-    restartApp();
+    restartApp(reason: "Capture ended");
   }
 
   Future<void> prepareFinalPanorama() async {
@@ -521,9 +522,6 @@ class _Camera360State extends State<Camera360> {
           finalStitchedImage = value;
           isPanoramaBeingStitched = false;
 
-          // Delete panorama images
-          deletePanoramaImages();
-
           // Callback function
           prepareOnCaptureEnded(finalStitchedImage);
         }).onError((error, stackTrace) {
@@ -531,7 +529,7 @@ class _Camera360State extends State<Camera360> {
 
           // Callback function
           prepareOnCaptureEnded(null);
-          debugPrint("Stitching failed");
+          debugPrint("'Panorama360': Stitching failed");
         });
       }
     }
@@ -601,7 +599,7 @@ class _Camera360State extends State<Camera360> {
   // Stitching failed
   void stitchingFailed() {
     hasStitchingFailed = true;
-    restartApp();
+    restartApp(reason: "Stitching failed");
   }
 
   // Select camera lens
@@ -611,7 +609,7 @@ class _Camera360State extends State<Camera360> {
     // Initialize new camera
     _initCamera(cameraKey).then((value) {
       // Restart app
-      restartApp();
+      restartApp(reason: "Camera selected");
     });
   }
 
@@ -663,7 +661,7 @@ class _Camera360State extends State<Camera360> {
       subscription.cancel();
     }
 
-    restartApp();
+    restartApp(reason: "App disposed");
     super.dispose();
   }
 
@@ -763,7 +761,8 @@ class _Camera360State extends State<Camera360> {
                         ),
                         // Reset
                         ElevatedButton(
-                            onPressed: () => restartApp(),
+                            onPressed: () =>
+                                restartApp(reason: "Restet button hit"),
                             child: const Text("reset")),
                       ],
                     ),

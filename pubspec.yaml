@@ -1,7 +1,7 @@
 name: camera_360
-description: A new Flutter FFI plugin project.
+description: Capture 360 images
 publish_to: none
-version: 0.0.2
+version: 0.0.3
 homepage:
 
 environment:

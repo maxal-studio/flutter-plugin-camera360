@@ -58,7 +58,7 @@ Camera360(
       print("Camera changed ${cameraKey.toString()}");
     },
     onProgressChanged: (newProgressPecentage) {
-      debugPrint("Progress changed: $newProgressPecentage");
+      debugPrint("'Panorama360': Progress changed: $newProgressPecentage");
     }),
 ),
 ```
