@@ -1,7 +1,7 @@
 name: camera_360
 description: Capture 360 images
 publish_to: none
-version: 0.0.4
+version: 1.0.4
 homepage:
 
 environment:
