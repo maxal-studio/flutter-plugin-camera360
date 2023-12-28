@@ -1,6 +1,5 @@
 import 'package:camera_360/camera_360.dart';
 import 'package:flutter/material.dart';
-import 'dart:async';
 
 import 'package:image_picker/image_picker.dart';
 import 'package:gallery_saver/gallery_saver.dart';
@@ -29,7 +28,7 @@ class _MyAppState extends State<MyApp> {
         appBar: AppBar(
           title: const Text('360 Camera App'),
         ),
-        body: CameraPage(),
+        body: const CameraPage(),
       ),
     );
   }
@@ -73,11 +72,11 @@ class _CameraPageState extends State<CameraPage> {
               displayPanoramaMessage(
                   context, "Camera changed ${cameraKey.toString()}");
             },
-            onProgressChanged: (newProgressPecentage) {
+            onProgressChanged: (newProgressPercentage) {
               debugPrint(
-                  "'Panorama360': Progress changed: $newProgressPecentage");
+                  "'Panorama360': Progress changed: $newProgressPercentage");
               setState(() {
-                progressPecentage = newProgressPecentage;
+                progressPecentage = newProgressPercentage;
               });
             }),
         Column(

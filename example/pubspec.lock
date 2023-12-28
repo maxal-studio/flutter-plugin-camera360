@@ -39,7 +39,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "0.0.2"
+    version: "1.0.5"
   camera_android:
     dependency: transitive
     description:
@@ -120,6 +120,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.8"
+  dchs_motion_sensors:
+    dependency: transitive
+    description:
+      name: dchs_motion_sensors
+      sha256: b14529e619b3d1767e725e7a51658507812d89b2c1ae2b7a3f5eaf9518e30f42
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.2"
   fake_async:
     dependency: transitive
     description:
@@ -343,14 +351,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.4"
-  motion_sensors:
-    dependency: transitive
-    description:
-      name: motion_sensors
-      sha256: "4e2734a76cd6da633013bcdc68a9efe9fbbcff906e6d6c45040932edda3fa5d6"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.1.0"
   package_info_plus:
     dependency: transitive
     description:

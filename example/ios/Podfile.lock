@@ -3,14 +3,14 @@ PODS:
     - Flutter
   - camera_avfoundation (0.0.1):
     - Flutter
+  - dchs_motion_sensors (0.0.1):
+    - Flutter
   - Flutter (1.0.0)
   - flutter_native_image (0.0.1):
     - Flutter
   - gallery_saver (0.0.1):
     - Flutter
   - image_picker_ios (0.0.1):
-    - Flutter
-  - motion_sensors (0.0.1):
     - Flutter
   - package_info_plus (0.4.5):
     - Flutter
@@ -23,11 +23,11 @@ PODS:
 DEPENDENCIES:
   - camera_360 (from `.symlinks/plugins/camera_360/ios`)
   - camera_avfoundation (from `.symlinks/plugins/camera_avfoundation/ios`)
+  - dchs_motion_sensors (from `.symlinks/plugins/dchs_motion_sensors/ios`)
   - Flutter (from `Flutter`)
   - flutter_native_image (from `.symlinks/plugins/flutter_native_image/ios`)
   - gallery_saver (from `.symlinks/plugins/gallery_saver/ios`)
   - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
-  - motion_sensors (from `.symlinks/plugins/motion_sensors/ios`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - wakelock_plus (from `.symlinks/plugins/wakelock_plus/ios`)
@@ -37,6 +37,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/camera_360/ios"
   camera_avfoundation:
     :path: ".symlinks/plugins/camera_avfoundation/ios"
+  dchs_motion_sensors:
+    :path: ".symlinks/plugins/dchs_motion_sensors/ios"
   Flutter:
     :path: Flutter
   flutter_native_image:
@@ -45,8 +47,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/gallery_saver/ios"
   image_picker_ios:
     :path: ".symlinks/plugins/image_picker_ios/ios"
-  motion_sensors:
-    :path: ".symlinks/plugins/motion_sensors/ios"
   package_info_plus:
     :path: ".symlinks/plugins/package_info_plus/ios"
   path_provider_foundation:
@@ -57,11 +57,11 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   camera_360: 21dbcc767560facc8acbc16f29789fd5fd99c9a6
   camera_avfoundation: 3125e8cd1a4387f6f31c6c63abb8a55892a9eeeb
+  dchs_motion_sensors: 9cef816635a39345cda9f0c4943e061f6429f453
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
   flutter_native_image: 9c0b7451838484458e5b0fae007b86a4c2d4bdfe
   gallery_saver: 9fc173c9f4fcc48af53b2a9ebea1b643255be542
   image_picker_ios: 4a8aadfbb6dc30ad5141a2ce3832af9214a705b5
-  motion_sensors: 03f55b7c637a7e365a0b5f9697a449f9059d5d91
   package_info_plus: fd030dabf36271f146f1f3beacd48f564b0f17f7
   path_provider_foundation: 29f094ae23ebbca9d3d0cec13889cd9060c0e943
   wakelock_plus: 8b09852c8876491e4b6d179e17dfe2a0b5f60d47

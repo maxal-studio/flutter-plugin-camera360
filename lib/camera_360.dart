@@ -2,7 +2,7 @@ import 'package:camera_360/layouts/device_rotation.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter_native_image/flutter_native_image.dart';
-import 'package:motion_sensors/motion_sensors.dart';
+import 'package:dchs_motion_sensors/dchs_motion_sensors.dart';
 import 'dart:async';
 import 'package:vector_math/vector_math_64.dart' hide Colors;
 import 'dart:math';
@@ -578,12 +578,12 @@ class _Camera360State extends State<Camera360> {
     debugPrint(imagePaths.toString());
 
     // Bindings
-    final Camera360Bindings _bindings = Camera360Bindings(dylib);
+    final Camera360Bindings bindings = Camera360Bindings(dylib);
 
     String dirpath =
         "${(await getApplicationDocumentsDirectory()).path}/stitched-panorama-${DateTime.now().millisecondsSinceEpoch}.jpg";
 
-    bool isStiched = _bindings.stitch(
+    bool isStiched = bindings.stitch(
         imagePaths.toString().toNativeUtf8() as Pointer<Char>,
         dirpath.toNativeUtf8() as Pointer<Char>,
         cropped);
