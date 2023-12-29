@@ -334,6 +334,10 @@ class _Camera360State extends State<Camera360> {
       helperDotHorizontalReach = (helperDotHorizontalReach - 360);
     }
 
+    if (helperDotHorizontalReach < 0) {
+      helperDotHorizontalReach = (360 + helperDotHorizontalReach);
+    }
+
     if (morePhotosNeeded()) {
       updateProgress();
     }

@@ -142,19 +142,28 @@ Mat process_stitching(vector<Mat> imgVec)
     Mat result = Mat();
     Stitcher::Mode mode = Stitcher::PANORAMA;
     Ptr<Stitcher> stitcher = Stitcher::create(mode);
-    Stitcher::Status status = stitcher->stitch(imgVec, result);
 
-    // If stitching failed
-    if (status != Stitcher::OK)
+    // Handle cv::Exception
+    try
     {
-        // hconcat(imgVec, result);
-        printf("'Stitcher': Stitching error: %d\n", status);
+        Stitcher::Status status = stitcher->stitch(imgVec, result);
+        // If stitching failed
+        if (status != Stitcher::OK)
+        {
+            // hconcat(imgVec, result);
+            printf("'Stitcher': Stitching error: %d\n", status);
+            return Mat();
+        }
+
+        printf("'Stitcher': Stitching success here\n");
+        cvtColor(result, result, COLOR_RGB2BGR);
+        return result;
+    }
+    catch (cv::Exception &e)
+    {
+        printf("'Stitcher': Stitching error cv::Exception: %s\n", e.err.c_str());
         return Mat();
     }
-
-    printf("'Stitcher': Stitching success here\n");
-    cvtColor(result, result, COLOR_RGB2BGR);
-    return result;
 }
 
 vector<Mat> convert_to_matlist(vector<string> img_list, bool isvertical)
