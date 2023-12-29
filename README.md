@@ -73,7 +73,7 @@ Camera360(
 > - `null` if the panorama has failed  
 
 
-## [Developer Documenttion](docs/developer.md)
+## [Developer Documentation](docs/developer.md)
 
 
 
