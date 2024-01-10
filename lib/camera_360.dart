@@ -1,3 +1,4 @@
+import 'package:camera_360/layouts/camera_selector.dart';
 import 'package:camera_360/layouts/device_rotation.dart';
 import 'package:camera_360/layouts/first_picture_helper_text.dart';
 import 'package:flutter/material.dart';
@@ -749,30 +750,17 @@ class _Camera360State extends State<Camera360> {
                     Column(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            for (int cameraKey = 0;
-                                cameraKey < cameras.length;
-                                cameraKey++) ...[
-                              ElevatedButton(
-                                  style: ButtonStyle(
-                                      backgroundColor:
-                                          cameraKey == selectedCameraKey
-                                              ? MaterialStateProperty.all(
-                                                  Colors.red)
-                                              : MaterialStateProperty.all(
-                                                  Colors.blue)),
-                                  onPressed: () => selectCamera(cameraKey),
-                                  child: Text(cameraKey.toString()))
-                            ],
-                          ],
-                        ),
+                        CameraSelector(
+                            cameras: cameras,
+                            selectedCameraKey: selectedCameraKey,
+                            onCameraChanged: (cameraKey) {
+                              selectCamera(cameraKey);
+                            }),
                         // Reset
-                        ElevatedButton(
-                            onPressed: () =>
-                                restartApp(reason: "Restet button hit"),
-                            child: const Text("reset")),
+                        //   ElevatedButton(
+                        //       onPressed: () =>
+                        //           restartApp(reason: "Restet button hit"),
+                        //       child: const Text("reset")),
                       ],
                     ),
                     // Helper dot
