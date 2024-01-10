@@ -56,7 +56,10 @@ class _CameraPageState extends State<CameraPage> {
     return Stack(
       children: [
         Camera360(
-            userSelectedCameraKey: 0,
+            userLoadingText: "Preparing panorama...",
+            userHelperText: "Point the camera at the dot",
+            // Suggested key for iPhone >= 11 is 2 to select the wide-angle camera
+            userSelectedCameraKey: 2,
             onCaptureEnded: (data) {
               if (data['success'] == true) {
                 // Save image to the gallery

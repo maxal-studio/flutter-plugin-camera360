@@ -44,30 +44,34 @@ minSdkVersion 21
 import 'package:camera_360/camera_360.dart';
 import 'package:image_picker/image_picker.dart';
 Camera360(
-    userSelectedCameraKey: 2,
-    onCaptureEnded: (data) {
-      // Returned data will be a map like below
-      //{
-      //  'success': true or false
-      //  'panorama': XFile or null,
-      //  'options': {
-      //    'selected_camera': int KEY,
-      //    'vertical_camera_angle': int DEG,
-      //  }
-      //}
-      if (data['success'] == true) {
-        XFile panorama = data['panorama'];
-        print("Final image returned $panorama.toString()");
-      } else {
-        print("Final image failed");
-      }
-    },
-    onCameraChanged: (cameraKey) {
-      print("Camera changed ${cameraKey.toString()}");
-    },
-    onProgressChanged: (newProgressPercentage) {
-      debugPrint("'Panorama360': Progress changed: $newProgressPercentage");
-    }),
+  userLoadingText: "Preparing panorama...",
+  userHelperText: "Point the camera at the dot",
+  // Suggested key for iPhone >= 11 is 2 to select the wide-angle camera
+  // On android devices 0 is suggested as at the moment Camera switching is not possible on android
+  userSelectedCameraKey: 2,
+  onCaptureEnded: (data) {
+    // Returned data will be a map like below
+    //{
+    //  'success': true or false
+    //  'panorama': XFile or null,
+    //  'options': {
+    //    'selected_camera': int KEY,
+    //    'vertical_camera_angle': int DEG,
+    //  }
+    //}
+    if (data['success'] == true) {
+      XFile panorama = data['panorama'];
+      print("Final image returned $panorama.toString()");
+    } else {
+      print("Final image failed");
+    }
+  },
+  onCameraChanged: (cameraKey) {
+    print("Camera changed ${cameraKey.toString()}");
+  },
+  onProgressChanged: (newProgressPercentage) {
+    debugPrint("'Panorama360': Progress changed: $newProgressPercentage");
+  }),
 ),
 ```
 

@@ -1,4 +1,5 @@
 import 'package:camera_360/layouts/device_rotation.dart';
+import 'package:camera_360/layouts/first_picture_helper_text.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter_native_image/flutter_native_image.dart';
@@ -24,6 +25,7 @@ class Camera360 extends StatefulWidget {
   final int? userCapturedImageWidth;
   final int? userCapturedImageQuality;
   final String? userLoadingText;
+  final String? userHelperText;
   final double? userDeviceVerticalCorrectDeg;
 
   const Camera360({
@@ -37,6 +39,7 @@ class Camera360 extends StatefulWidget {
     this.userCapturedImageQuality,
     this.userDeviceVerticalCorrectDeg,
     this.userLoadingText,
+    this.userHelperText,
   }) : super(key: key);
 
   @override
@@ -92,6 +95,7 @@ class _Camera360State extends State<Camera360> {
   bool hasStitchingFailed = false;
   int selectedCameraKey = 0;
   String loadingText = "";
+  String helperText = "";
 
   int nrPhotosTaken = 0;
   late XFile testStichingImage; // Stitched panorama image
@@ -117,6 +121,7 @@ class _Camera360State extends State<Camera360> {
     degToNextPosition = 360 / nrPhotos;
     selectedCameraKey = widget.userSelectedCameraKey ?? 0;
     loadingText = widget.userLoadingText ?? 'Preparing panorama...';
+    helperText = widget.userHelperText ?? 'Point the camera at the dot';
 
     _setupSensors();
     _setupCameras();
@@ -782,6 +787,11 @@ class _Camera360State extends State<Camera360> {
                     isDeviceRotationCorrect
                         ? Container()
                         : DeviceRotation(deviceRotation: deviceRotationDeg),
+                    // Helper Text
+                    FirstPictureHelperText(
+                      shown: capturedImages.isEmpty,
+                      helperText: helperText,
+                    ),
                     // Centered
                     Transform.translate(
                       offset: Offset(centeredDotPosX, centeredDotPosY),
