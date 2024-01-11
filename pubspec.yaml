@@ -1,6 +1,5 @@
 name: camera_360
 description: Capture 360 images
-publish_to: none
 version: 1.0.0
 homepage: https://github.com/maxal-studio/flutter-plugin-camera360
 
