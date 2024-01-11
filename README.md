@@ -57,7 +57,13 @@ Camera360(
   // Camera selector Info Visibilitiy
   cameraSelectorInfoPopUpShow: true,
   // Camera selector Info Widget
-  cameraSelectorInfoPopUpContent: Widget,
+  cameraSelectorInfoPopUpContent: const Text(
+    "Select the camera with the widest viewing angle below.",
+    textAlign: TextAlign.center,
+    style: TextStyle(
+      color: Color(0xffEFEFEF),
+    ),
+  ),
   onCaptureEnded: (data) {
     // Returned data will be a map like below
     //{
