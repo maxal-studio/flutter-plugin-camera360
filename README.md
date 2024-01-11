@@ -6,7 +6,7 @@ A simple UI guides the user throughout the process, by displaying dots on the sc
 ### Demo
 Checkout [Tridiar - Virtual Tours](https://tridiar.com) application on [iOS](https://apps.apple.com/us/app/tridiar/id1593706196) and [Android](https://play.google.com/store/apps/details?id=com.tridiar.agent)
 
-![Demo](./docs/demo.gif)
+![Demo](./doc/demo.gif)
 
 # Installation
 
@@ -95,7 +95,7 @@ Camera360(
 > - `null` if the panorama has failed  
 
 
-## [Developer Documentation](docs/developer.md)
+## [Developer Documentation](doc/developer.md)
 
 
 

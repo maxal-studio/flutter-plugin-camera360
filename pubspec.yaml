@@ -19,9 +19,9 @@ dependencies:
   flutter_native_image: ^0.0.6
   vector_math: ^2.1.4
   shared_preferences: ^2.2.2
+  ffi: ^2.0.1
 
 dev_dependencies:
-  ffi: ^2.0.1
   ffigen: ^6.1.2
   flutter_test:
     sdk: flutter
