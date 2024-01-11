@@ -1,7 +1,7 @@
 name: camera_360
 description: Capture 360 images
 publish_to: none
-version: 1.0.5
+version: 1.0.6
 homepage:
 
 environment:
@@ -19,6 +19,7 @@ dependencies:
   path_provider: ^2.1.0
   flutter_native_image: ^0.0.6
   vector_math: ^2.1.4
+  shared_preferences: ^2.2.2
 
 dev_dependencies:
   ffi: ^2.0.1

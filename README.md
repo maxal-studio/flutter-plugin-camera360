@@ -6,6 +6,8 @@ A simple UI guides the user throughout the process, by displaying dots on the sc
 ### Demo
 Checkout [Tridiar - Virtual Tours](https://tridiar.com) application on [iOS](https://apps.apple.com/us/app/tridiar/id1593706196) and [Android](https://play.google.com/store/apps/details?id=com.tridiar.agent)
 
+![Demo](./docs/demo.gif)
+
 # Installation
 
 ### IOS
@@ -44,11 +46,18 @@ minSdkVersion 21
 import 'package:camera_360/camera_360.dart';
 import 'package:image_picker/image_picker.dart';
 Camera360(
+  // Preparing panorama text
   userLoadingText: "Preparing panorama...",
   userHelperText: "Point the camera at the dot",
   // Suggested key for iPhone >= 11 is 2 to select the wide-angle camera
   // On android devices 0 is suggested as at the moment Camera switching is not possible on android
   userSelectedCameraKey: 2,
+  // Camera selector Visibilitiy
+  cameraSelectorShow: true,
+  // Camera selector Info Visibilitiy
+  cameraSelectorInfoPopUpShow: true,
+  // Camera selector Info Widget
+  cameraSelectorInfoPopUpContent: Widget,
   onCaptureEnded: (data) {
     // Returned data will be a map like below
     //{

@@ -28,6 +28,9 @@ class Camera360 extends StatefulWidget {
   final String? userLoadingText;
   final String? userHelperText;
   final double? userDeviceVerticalCorrectDeg;
+  final bool cameraSelectorInfoPopUpShow;
+  final bool cameraSelectorShow;
+  final Widget? cameraSelectorInfoPopUpContent;
 
   const Camera360({
     Key? key,
@@ -41,6 +44,9 @@ class Camera360 extends StatefulWidget {
     this.userDeviceVerticalCorrectDeg,
     this.userLoadingText,
     this.userHelperText,
+    this.cameraSelectorShow = true,
+    this.cameraSelectorInfoPopUpShow = true,
+    this.cameraSelectorInfoPopUpContent,
   }) : super(key: key);
 
   @override
@@ -750,12 +756,18 @@ class _Camera360State extends State<Camera360> {
                     Column(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        CameraSelector(
-                            cameras: cameras,
-                            selectedCameraKey: selectedCameraKey,
-                            onCameraChanged: (cameraKey) {
-                              selectCamera(cameraKey);
-                            }),
+                        widget.cameraSelectorShow == true
+                            ? CameraSelector(
+                                cameras: cameras,
+                                selectedCameraKey: selectedCameraKey,
+                                infoPopUpContent:
+                                    widget.cameraSelectorInfoPopUpContent,
+                                infoPopUpShow:
+                                    widget.cameraSelectorInfoPopUpShow,
+                                onCameraChanged: (cameraKey) {
+                                  selectCamera(cameraKey);
+                                })
+                            : Container(),
                         // Reset
                         //   ElevatedButton(
                         //       onPressed: () =>
