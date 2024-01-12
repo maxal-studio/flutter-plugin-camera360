@@ -1,6 +1,6 @@
 # 360 Camera
 
-This plugin allows the users to take 360 Panoramic Images using the phones Camera. It uses OpenCV to stitch the images together.
+This plugin allows the users to take 360 Panoramic Images using the phone's Camera. It uses OpenCV to stitch the images together.
 A simple UI guides the user throughout the process, by displaying dots on the screen that the user should follow.
 
 ### Demo
