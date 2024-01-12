@@ -55,6 +55,13 @@ target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC
 	${GLES2_LIBRARY}
 )
 
+# Strip Debug to make the libraries lighter
+set(STRIP ${ANDROID_NDK}/toolchains/llvm/prebuilt/darwin-x86_64/bin/)
+add_custom_command(TARGET ${CMAKE_PROJECT_NAME} POST_BUILD
+            COMMAND "${STRIP}llvm-strip" -g -S -d --strip-debug
+            "lib${CMAKE_PROJECT_NAME}.so"
+            COMMENT "Strip debug symbols done on final binary.")
+
 #NDK ONLY?
 #add_compile_options(-fexceptions -frtti)
 
