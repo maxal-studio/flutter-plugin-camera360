@@ -6,7 +6,6 @@ homepage: https://github.com/maxal-studio/flutter-plugin-camera360
 topics:
   - camera
   - panorama
-  - 360
 
 environment:
   sdk: ">=3.0.2 <4.0.0"
