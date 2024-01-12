@@ -7,7 +7,6 @@ import 'package:flutter_native_image/flutter_native_image.dart';
 import 'package:dchs_motion_sensors/dchs_motion_sensors.dart';
 import 'dart:async';
 import 'package:vector_math/vector_math_64.dart' hide Colors;
-import 'dart:math';
 import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 import 'dart:io';
