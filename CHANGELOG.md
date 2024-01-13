@@ -1,3 +1,7 @@
+## 1.0.3
+
+- Fixed: Clearing CameraSelector state on init
+
 ## 1.0.2
 
 - Check userSelectedCameraKey if exists

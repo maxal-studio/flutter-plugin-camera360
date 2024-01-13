@@ -48,6 +48,12 @@ class _CameraSelectorState extends State<CameraSelector> {
   void initState() {
     super.initState();
 
+    cameraKeys = [];
+    // Populate camera keys
+    for (int cameraKey = 0; cameraKey < widget.cameras.length; cameraKey++) {
+      cameraKeys.add(cameraKey.toString());
+    }
+
     infoPopUpContentValue = widget.infoPopUpContent ??
         const Column(
           children: [
@@ -76,11 +82,6 @@ class _CameraSelectorState extends State<CameraSelector> {
       infoPopUpShowValue =
           prefs.getBool('infoPopUpShowValue') ?? widget.infoPopUpShow;
     });
-
-    // Populate camera keys
-    for (int cameraKey = 0; cameraKey < widget.cameras.length; cameraKey++) {
-      cameraKeys.add(cameraKey.toString());
-    }
   }
 
   @override

@@ -14,11 +14,11 @@ Checkout [Tridiar - Virtual Tours](https://tridiar.com) application on [iOS](htt
 Add these lines into `Info.plist`
 ```plist
 <key>NSCameraUsageDescription</key>
-<string>This application needs access to your Camera in order to capture360 Images</string>
+<string>This application needs access to your Camera in order to capture 360 Images</string>
 <key>NSMicrophoneUsageDescription</key>
-<string>This application needs access to your Microphone in order tocapture videos</string>
+<string>This application needs access to your Microphone in order to capture videos</string>
 <key>NSPhotoLibraryUsageDescription</key>
-<string>This application needs access to your Photo Library in order to saved the captured images</string>
+<string>This application needs access to your Photo Library in order to save the captured images</string>
 ```
 
 ### Android
