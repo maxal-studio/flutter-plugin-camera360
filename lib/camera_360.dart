@@ -220,6 +220,12 @@ class _Camera360State extends State<Camera360> {
 
   // Initialize camera
   Future<void> _initCamera(int cameraKey) async {
+    // Check if selected camera exists
+    if (cameras.asMap().containsKey(cameraKey) == false) {
+      // Update selectedCameraKey
+      selectedCameraKey = 0;
+      cameraKey = 0;
+    }
     CameraDescription description = cameras[cameraKey];
     // Update selectedCameraKey
     selectedCameraKey = cameraKey;

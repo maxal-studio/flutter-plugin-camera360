@@ -58,7 +58,7 @@ class _CameraPageState extends State<CameraPage> {
             userLoadingText: "Preparing panorama...",
             userHelperText: "Point the camera at the dot",
             // Suggested key for iPhone >= 11 is 2 to select the wide-angle camera
-            userSelectedCameraKey: 0,
+            userSelectedCameraKey: 2,
             cameraSelectorShow: true,
             cameraSelectorInfoPopUpShow: true,
             cameraSelectorInfoPopUpContent: const Column(
