@@ -54,7 +54,7 @@ class Camera360 extends StatefulWidget {
 
 // THE STATE IS BEING UPDATED EVERY SET SECONDS
 // The state is updated by this function _setupSensors
-class _Camera360State extends State<Camera360> {
+class _Camera360State extends State<Camera360> with WidgetsBindingObserver {
   late List<CameraDescription> cameras;
   late CameraController controller;
   bool _isReady = false;
@@ -114,6 +114,7 @@ class _Camera360State extends State<Camera360> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
 
     // Updating System Variables depending on User Variables
     deviceVerticalCorrectDeg = widget.userDeviceVerticalCorrectDeg ?? 75;
@@ -191,6 +192,7 @@ class _Camera360State extends State<Camera360> {
     }
   }
 
+  // Enable Device Motion Sensors
   void _setupSensors() {
     // Update interval
     int interval = Duration.microsecondsPerSecond ~/ 30;
@@ -204,6 +206,13 @@ class _Camera360State extends State<Camera360> {
         _absoluteOrientation.setValues(event.yaw, event.pitch, event.roll);
       });
     }));
+  }
+
+  // Disable Device Motion Sensors
+  void _disableSensors() {
+    for (StreamSubscription<dynamic> subscription in _streamSubscriptions) {
+      subscription.cancel();
+    }
   }
 
   // Setup Cameras
@@ -674,16 +683,36 @@ class _Camera360State extends State<Camera360> {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    switch (state) {
+      case AppLifecycleState.resumed:
+        // Reenable sensors when app state is resumed
+        _setupSensors();
+        break;
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.paused:
+      case AppLifecycleState.detached:
+      case AppLifecycleState.hidden:
+        // Disable sensors when app is not active
+        _disableSensors();
+        break;
+    }
+  }
+
+  @override
   void dispose() {
     // Disable screen always on
     WakelockPlus.disable();
     controller.dispose();
-    for (StreamSubscription<dynamic> subscription in _streamSubscriptions) {
-      subscription.cancel();
-    }
-
+    // Sensors are disabled using didChangeAppLifecycleState but we need
+    // to disable them again when disposed in case user navigates into another
+    // view
+    _disableSensors();
     restartApp(reason: "App disposed");
     super.dispose();
+    WidgetsBinding.instance.removeObserver(this);
   }
 
   @override

@@ -1,3 +1,7 @@
+## 1.0.4
+
+- Fixed: App crashing when closed
+
 ## 1.0.3
 
 - Fixed: Clearing CameraSelector state on init
