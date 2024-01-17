@@ -1,3 +1,7 @@
+## 1.0.5
+
+- New: Added a line between two "Dots" to show the user which way to move the phone
+
 ## 1.0.4
 
 - Fixed: App crashing when closed

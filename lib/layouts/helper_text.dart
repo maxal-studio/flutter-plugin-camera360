@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-class FirstPictureHelperText extends StatelessWidget {
+class HelperText extends StatelessWidget {
   final String helperText;
   final bool shown;
-  const FirstPictureHelperText({
+  const HelperText({
     super.key,
     this.shown = true,
     this.helperText = "",
