@@ -1,6 +1,6 @@
 import 'package:camera_360/layouts/camera_selector.dart';
-import 'package:camera_360/layouts/device_rotation.dart';
-import 'package:camera_360/layouts/first_picture_helper_text.dart';
+import 'package:camera_360/layouts/helper_text.dart';
+import 'package:camera_360/layouts/orientation_helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter_native_image/flutter_native_image.dart';
@@ -809,36 +809,24 @@ class _Camera360State extends State<Camera360> with WidgetsBindingObserver {
                         //       child: const Text("reset")),
                       ],
                     ),
-                    // Helper dot
-                    Transform.translate(
-                      offset: Offset(helperDotPosX, helperDotPosY),
-                      child: CircleAvatar(
-                        radius: helperDotRadius,
-                        backgroundColor: helperDotColor,
-                      ),
-                    ),
-                    // Device Rotaion
-                    isDeviceRotationCorrect
-                        ? Container()
-                        : DeviceRotation(deviceRotation: deviceRotationDeg),
-                    // Helper Text
-                    FirstPictureHelperText(
+                    // Helper Text for the first image
+                    HelperText(
                       shown: capturedImages.isEmpty,
                       helperText: helperText,
                     ),
-                    // Centered
-                    Transform.translate(
-                      offset: Offset(centeredDotPosX, centeredDotPosY),
-                      child: Container(
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(100),
-                            border: Border.all(
-                                width: centeredDotBorder, color: Colors.white)),
-                        child: CircleAvatar(
-                          radius: centeredDotRadius,
-                          backgroundColor: centeredDotColor,
-                        ),
-                      ),
+                    // Displays dots to help the user orientate
+                    OrientationHelpers(
+                      helperDotPosX: helperDotPosX,
+                      helperDotPosY: helperDotPosY,
+                      helperDotRadius: helperDotRadius,
+                      helperDotColor: helperDotColor,
+                      centeredDotPosX: centeredDotPosX,
+                      centeredDotRadius: centeredDotRadius,
+                      centeredDotPosY: centeredDotPosY,
+                      centeredDotBorder: centeredDotBorder,
+                      centeredDotColor: centeredDotColor,
+                      isDeviceRotationCorrect: isDeviceRotationCorrect,
+                      deviceRotationDeg: deviceRotationDeg,
                     ),
                   ],
                 )
