@@ -42,15 +42,6 @@ class _OrientationHelpersState extends State<OrientationHelpers> {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        // Helper dot
-        Transform.translate(
-          offset: Offset(widget.helperDotPosX, widget.helperDotPosY),
-          child: CircleAvatar(
-            radius: widget.helperDotRadius,
-            backgroundColor: widget.helperDotColor,
-          ),
-        ),
-
         // This draws a line between two dots
         CustomPaint(
           painter: LinePainter(
@@ -81,6 +72,15 @@ class _OrientationHelpersState extends State<OrientationHelpers> {
               radius: widget.centeredDotRadius,
               backgroundColor: widget.centeredDotColor,
             ),
+          ),
+        ),
+
+        // Helper dot
+        Transform.translate(
+          offset: Offset(widget.helperDotPosX, widget.helperDotPosY),
+          child: CircleAvatar(
+            radius: widget.helperDotRadius,
+            backgroundColor: widget.helperDotColor,
           ),
         ),
 
