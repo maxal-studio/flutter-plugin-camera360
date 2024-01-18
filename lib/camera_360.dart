@@ -16,19 +16,35 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 import 'camera_360_bindings_generated.dart';
 
 class Camera360 extends StatefulWidget {
-  // const Camera360({super.key});
+  // Callback called when capture has ended and panorama is prepared
   final void Function(Map<String, dynamic>) onCaptureEnded;
+  // Callback called when camera has changed
   final void Function(int)? onCameraChanged;
+  // Callback called when progress has changed
   final void Function(int)? onProgressChanged;
+  // Preselected camera key
   final int? userSelectedCameraKey;
+  // Nr of photos to be taken in a 360 deg rotation
   final int? userNrPhotos;
+  // Image resize size
   final int? userCapturedImageWidth;
+  // Image resize quality
   final int? userCapturedImageQuality;
+  // Loading text is shown when panorama is being prepared
   final String? userLoadingText;
+  // Helper text is shown while taking the first image
   final String? userHelperText;
+  // Tilt left text is shown when user should tilt the phone to the left
+  final String? userHelperTiltLeftText;
+  // Tilt right text is shown when user should tilt the phone to the right
+  final String? userHelperTiltRightText;
+  // The vertical deg the user should hold his phone while taking images
   final double? userDeviceVerticalCorrectDeg;
+  // This popup is shown to help the user select a camera
   final bool cameraSelectorInfoPopUpShow;
+  // cameraSelector popup visibility
   final bool cameraSelectorShow;
+  // cameraSelector popup content <Widget>
   final Widget? cameraSelectorInfoPopUpContent;
 
   const Camera360({
@@ -43,6 +59,8 @@ class Camera360 extends StatefulWidget {
     this.userDeviceVerticalCorrectDeg,
     this.userLoadingText,
     this.userHelperText,
+    this.userHelperTiltLeftText,
+    this.userHelperTiltRightText,
     this.cameraSelectorShow = true,
     this.cameraSelectorInfoPopUpShow = true,
     this.cameraSelectorInfoPopUpContent,
@@ -55,11 +73,16 @@ class Camera360 extends StatefulWidget {
 // THE STATE IS BEING UPDATED EVERY SET SECONDS
 // The state is updated by this function _setupSensors
 class _Camera360State extends State<Camera360> with WidgetsBindingObserver {
+  // A list with all available camera
   late List<CameraDescription> cameras;
+  // Camera controller
   late CameraController controller;
+  // _isReady is true when device is ready to take another image
   bool _isReady = false;
   double posX = 180, posY = 350;
+  // _absoluteOrientation is a vector containg the yaw,pitch,roll of the device
   final Vector3 _absoluteOrientation = Vector3.zero();
+  // StreamSubscription will subscribe to _absoluteOrientation changes
   final List<StreamSubscription<dynamic>> _streamSubscriptions =
       <StreamSubscription<dynamic>>[];
 
@@ -72,6 +95,7 @@ class _Camera360State extends State<Camera360> with WidgetsBindingObserver {
   double deviceVerticalCorrectDeg = 75;
   static const double helperDotRadius = 20;
   bool helperDotVerticalInPos = false;
+  // The tolerance the user is allowed to have while taking images
   static const double helperDotVerticalTolerance = 1; // *2
   static const double helperDotHorizontalTolerance = 2; // *2
   static const double helperDotRotationTolerance = 4; // *2
@@ -81,27 +105,45 @@ class _Camera360State extends State<Camera360> with WidgetsBindingObserver {
   late int capturedImageQuality;
   late int nrPhotos;
   late double degreesPerPhotos;
+  // Camera360 always tries to stich the last image with the previous one
+  // If the stitching fails the user will need to take another image more
+  // to the left, so that the stiching is more possible
   late double goBackDegrees;
+  // Nr of times the user has rotated back
   int nrGoBacksDone = 0;
+  // Nr of time a user is allowed to rotate back before failing
   int nrGoBacksAllowed = 5;
+  // 0-360 deg, to the next position where the user should take the next image
   late double degToNextPosition;
 
   // VARIABLES
+  // All captured images
   List<XFile> capturedImages = [];
   // This value will be updated with the deg the phone must move horizontally
   double horizontalMovementNeeded = 0;
+  // The progress till now
   int progressPercentage = 0;
+  // This variable saved the last success horizontal position
   double lastSuccessHorizontalPosition = 0; // H Deg on last success image taken
+  // When user has horizontaly aligned the phone with the helperDot
   bool helperDotIsHorizontalInPos = false;
+  // 0-360 deg where the user should rotate to take the next image
   double helperDotHorizontalReach = 0;
   List rightRanges = [];
+  // The initial device horizontal deg
   double? deviceHorizontalDegInitial;
+  // Is device in correct position
   bool deviceInCorrectPosition = false;
+  // While taking image is set to true
   bool takingPicture = false;
+  // When stitching failes the user will need to take a nother image
+  // more to the left
   bool hasStitchingFailed = false;
   int selectedCameraKey = 0;
   String loadingText = "";
   String helperText = "";
+  String helperTiltLeftText = "";
+  String helperTiltRightText = "";
 
   int nrPhotosTaken = 0;
   late XFile testStichingImage; // Stitched panorama image
@@ -129,6 +171,8 @@ class _Camera360State extends State<Camera360> with WidgetsBindingObserver {
     selectedCameraKey = widget.userSelectedCameraKey ?? 0;
     loadingText = widget.userLoadingText ?? 'Preparing panorama...';
     helperText = widget.userHelperText ?? 'Point the camera at the dot';
+    helperTiltLeftText = widget.userHelperTiltLeftText ?? 'Tilt left';
+    helperTiltRightText = widget.userHelperTiltRightText ?? 'Tilt right';
 
     _setupSensors();
     _setupCameras();
@@ -270,6 +314,7 @@ class _Camera360State extends State<Camera360> with WidgetsBindingObserver {
     takingPicture = false;
   }
 
+  // Resize captured image for faster stitching
   Future<XFile> resizeImage(img) async {
     ImageProperties properties =
         await FlutterNativeImage.getImageProperties(img.path);
@@ -516,13 +561,32 @@ class _Camera360State extends State<Camera360> with WidgetsBindingObserver {
 
   // Check if Device Roation is correct
   bool checkDeviceRotation(deviceRotationDeg) {
-    if (deviceRotationDeg > helperDotRotationTolerance ||
-        deviceRotationDeg < (helperDotRotationTolerance * -1)) {
+    if (checkRightDeviceRotation(deviceRotationDeg) &&
+        checkLeftDeviceRotation(deviceRotationDeg)) {
+      return true;
+    }
+    return false;
+  }
+
+  // Check if Device is rotated more to the left
+  bool checkLeftDeviceRotation(deviceRotationDeg) {
+    if (deviceRotationDeg < (helperDotRotationTolerance * -1)) {
       return false;
     }
+
     return true;
   }
 
+  // Check if Device is rotated more to the right
+  bool checkRightDeviceRotation(deviceRotationDeg) {
+    if (deviceRotationDeg > helperDotRotationTolerance) {
+      return false;
+    }
+
+    return true;
+  }
+
+  // Prepare data for the callback function after image stitched
   void prepareOnCaptureEnded(finalStitchedImage) {
     // Check if resolution is greater then 2:1
 
@@ -541,6 +605,7 @@ class _Camera360State extends State<Camera360> with WidgetsBindingObserver {
     restartApp(reason: "Capture ended");
   }
 
+  // Stitch all captured imaged into the Final Panorama image
   Future<void> prepareFinalPanorama() async {
     // Download image
     if (imageSaved == false) {
@@ -682,6 +747,7 @@ class _Camera360State extends State<Camera360> with WidgetsBindingObserver {
     return calculatedDeg;
   }
 
+  // When app is not active disable the sensor readings
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
@@ -772,7 +838,7 @@ class _Camera360State extends State<Camera360> with WidgetsBindingObserver {
 
         //  Helper dot color depending on device rotation
         var helperDotColor =
-            isDeviceRotationCorrect == true ? Colors.white : Colors.red;
+            deviceInCorrectPosition == true ? Colors.white : Colors.red;
 
         // If no more photos are needed than it's time to stitch the final panorama
         if (morePhotosNeeded() == false) {
@@ -803,16 +869,27 @@ class _Camera360State extends State<Camera360> with WidgetsBindingObserver {
                                 })
                             : Container(),
                         // Reset
-                        //   ElevatedButton(
-                        //       onPressed: () =>
-                        //           restartApp(reason: "Restet button hit"),
-                        //       child: const Text("reset")),
+                        // ElevatedButton(
+                        //     onPressed: () =>
+                        //         restartApp(reason: "Restet button hit"),
+                        //     child: const Text("reset")),
                       ],
                     ),
                     // Helper Text for the first image
                     HelperText(
-                      shown: capturedImages.isEmpty,
+                      shown: capturedImages.isEmpty &&
+                          (helperDotVerticalInPos == false ||
+                              helperDotIsHorizontalInPos == false),
                       helperText: helperText,
+                    ),
+                    // Display titl helper text
+                    HelperText(
+                      shown: helperDotVerticalInPos == true &&
+                          helperDotIsHorizontalInPos == true &&
+                          isDeviceRotationCorrect == false,
+                      helperText: checkLeftDeviceRotation(deviceRotationDeg)
+                          ? helperTiltLeftText
+                          : helperTiltRightText,
                     ),
                     // Displays dots to help the user orientate
                     OrientationHelpers(

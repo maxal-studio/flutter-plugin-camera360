@@ -1,3 +1,7 @@
+## 1.0.6
+
+- New: Added tilt phone left/right text when device is not rotated correctly
+
 ## 1.0.5
 
 - New: Added a line between two "Dots" to show the user which way to move the phone
