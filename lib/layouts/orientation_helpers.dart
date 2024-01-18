@@ -4,18 +4,29 @@ import 'package:flutter/material.dart';
 
 class OrientationHelpers extends StatefulWidget {
   // Helper Dot
+  // Helper dot X position
   final double helperDotPosX;
+  // Helper dot Y position
   final double helperDotPosY;
+  // Helper dot radius
   final double helperDotRadius;
+  // Helper dot color
   final Color helperDotColor;
+
   // Centered dot
+  // Centered dot X position
   final double centeredDotPosX;
-  final double centeredDotRadius;
+  // Centered dot Y position
   final double centeredDotPosY;
+  // Centered dot radius
+  final double centeredDotRadius;
+  // Centered dot border size
   final double centeredDotBorder;
+  // Centered dot color
   final Color centeredDotColor;
   // Device rotation
   final bool isDeviceRotationCorrect;
+  // Device rotation deg
   final double deviceRotationDeg;
 
   const OrientationHelpers({
@@ -58,6 +69,15 @@ class _OrientationHelpersState extends State<OrientationHelpers> {
               strokeWidth: 2),
         ),
 
+        // Helper dot
+        Transform.translate(
+          offset: Offset(widget.helperDotPosX, widget.helperDotPosY),
+          child: CircleAvatar(
+            radius: widget.helperDotRadius,
+            backgroundColor: widget.helperDotColor,
+          ),
+        ),
+
         // Centered outlined dot
         Transform.translate(
           offset: Offset(widget.centeredDotPosX, widget.centeredDotPosY),
@@ -72,15 +92,6 @@ class _OrientationHelpersState extends State<OrientationHelpers> {
               radius: widget.centeredDotRadius,
               backgroundColor: widget.centeredDotColor,
             ),
-          ),
-        ),
-
-        // Helper dot
-        Transform.translate(
-          offset: Offset(widget.helperDotPosX, widget.helperDotPosY),
-          child: CircleAvatar(
-            radius: widget.helperDotRadius,
-            backgroundColor: widget.helperDotColor,
           ),
         ),
 

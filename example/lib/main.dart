@@ -55,55 +55,69 @@ class _CameraPageState extends State<CameraPage> {
     return Stack(
       children: [
         Camera360(
-            userLoadingText: "Preparing panorama...",
-            userHelperText: "Point the camera at the dot",
-            // Suggested key for iPhone >= 11 is 2 to select the wide-angle camera
-            userSelectedCameraKey: 2,
-            cameraSelectorShow: true,
-            cameraSelectorInfoPopUpShow: true,
-            cameraSelectorInfoPopUpContent: const Column(
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(bottom: 10),
-                  child: Text(
-                    "Notice: This feature only works if your phone has a wide angle camera.",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Color(0xffDB4A3C),
-                    ),
-                  ),
-                ),
-                Text(
-                  "Select the camera with the widest viewing angle below.",
+          // Text shown while panorama image is being prepared
+          userLoadingText: "Preparing panorama...",
+          // Text shown on while taking the first image
+          userHelperText: "Point the camera at the dot",
+          // Text shown when user should tilt the device to the left
+          userHelperTiltLeftText: "Tilt left",
+          // Text shown when user should tilt the device to the right
+          userHelperTiltRightText: "Tilt Right",
+          // Suggested key for iPhone >= 11 is 2 to select the wide-angle camera
+          // On android devices 0 is suggested as at the moment Camera switching is not possible on android
+          userSelectedCameraKey: 2,
+          // Camera selector Visibilitiy
+          cameraSelectorShow: true,
+          // Camera selector Info Visibilitiy
+          cameraSelectorInfoPopUpShow: true,
+          // Camera selector Info Widget
+          cameraSelectorInfoPopUpContent: const Column(
+            children: [
+              Padding(
+                padding: EdgeInsets.only(bottom: 10),
+                child: Text(
+                  "Notice: This feature only works if your phone has a wide angle camera.",
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: Color(0xffEFEFEF),
+                    color: Color(0xffDB4A3C),
                   ),
                 ),
-              ],
-            ),
-            onCaptureEnded: (data) {
-              if (data['success'] == true) {
-                // Save image to the gallery
-                XFile panorama = data['panorama'];
-                GallerySaver.saveImage(panorama.path);
-                displayPanoramaMessage(context, 'Panorama saved!');
-              } else {
-                displayPanoramaMessage(context, 'Panorama failed!');
-              }
-              print(data);
-            },
-            onCameraChanged: (cameraKey) {
-              displayPanoramaMessage(
-                  context, "Camera changed ${cameraKey.toString()}");
-            },
-            onProgressChanged: (newProgressPercentage) {
-              debugPrint(
-                  "'Panorama360': Progress changed: $newProgressPercentage");
-              setState(() {
-                progressPecentage = newProgressPercentage;
-              });
-            }),
+              ),
+              Text(
+                "Select the camera with the widest viewing angle below.",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Color(0xffEFEFEF),
+                ),
+              ),
+            ],
+          ),
+          // Callback function called when 360 capture ended
+          onCaptureEnded: (data) {
+            if (data['success'] == true) {
+              // Save image to the gallery
+              XFile panorama = data['panorama'];
+              GallerySaver.saveImage(panorama.path);
+              displayPanoramaMessage(context, 'Panorama saved!');
+            } else {
+              displayPanoramaMessage(context, 'Panorama failed!');
+            }
+            print(data);
+          },
+          // Callback function called when the camera lens is changed
+          onCameraChanged: (cameraKey) {
+            displayPanoramaMessage(
+                context, "Camera changed ${cameraKey.toString()}");
+          },
+          // Callback function called when capture progress is changed
+          onProgressChanged: (newProgressPercentage) {
+            debugPrint(
+                "'Panorama360': Progress changed: $newProgressPercentage");
+            setState(() {
+              progressPecentage = newProgressPercentage;
+            });
+          },
+        ),
         Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [

@@ -29,15 +29,19 @@ class _CameraSelectorState extends State<CameraSelector> {
   Widget? infoPopUpContentValue;
   late final SharedPreferences prefs;
 
+  // When camera is changed call the callback
   void cameraChanged(int cameraKey) {
     widget.onCameraChanged?.call(cameraKey);
   }
 
+  // Hide the helper popup
   void hideHelperPopUP() {
     infoPopUpShowValue = false;
     prefs.setBool('infoPopUpShowValue', false);
   }
 
+  // Using SharedPreferences to register if user already clicked on
+  // camera change dropdown, so that the helperPopUp will not be shown again
   Future<SharedPreferences> getSharedPreferences() async {
     prefs = await SharedPreferences.getInstance();
 

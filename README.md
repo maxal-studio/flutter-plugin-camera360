@@ -46,11 +46,16 @@ minSdkVersion 21
 import 'package:camera_360/camera_360.dart';
 import 'package:image_picker/image_picker.dart';
 Camera360(
-  // Preparing panorama text
+  // Text shown while panorama image is being prepared
   userLoadingText: "Preparing panorama...",
+  // Text shown on while taking the first image
   userHelperText: "Point the camera at the dot",
+  // Text shown when user should tilt the device to the left
+  userHelperTiltLeftText: "Tilt left",
+  // Text shown when user should tilt the device to the right
+  userHelperTiltRightText: "Tilt Right",
   // Suggested key for iPhone >= 11 is 2 to select the wide-angle camera
-  // On android devices 0 is suggested as at the moment Camera switching is not possible on android
+  // On android devices 0 is suggested as at the moment Camera switchingis not possible on android
   userSelectedCameraKey: 2,
   // Camera selector Visibilitiy
   cameraSelectorShow: true,
@@ -64,6 +69,7 @@ Camera360(
       color: Color(0xffEFEFEF),
     ),
   ),
+  // Callback function called when 360 capture ended
   onCaptureEnded: (data) {
     // Returned data will be a map like below
     //{
@@ -81,12 +87,14 @@ Camera360(
       print("Final image failed");
     }
   },
+  // Callback function called when the camera lens is changed
   onCameraChanged: (cameraKey) {
     print("Camera changed ${cameraKey.toString()}");
   },
+  // Callback function called when capture progress is changed
   onProgressChanged: (newProgressPercentage) {
     debugPrint("'Panorama360': Progress changed: $newProgressPercentage");
-  }),
+  },
 ),
 ```
 
