@@ -1,3 +1,7 @@
+## 1.0.7
+
+- Fixed: dispose method
+
 ## 1.0.6
 
 - New: Added tilt phone left/right text when device is not rotated correctly

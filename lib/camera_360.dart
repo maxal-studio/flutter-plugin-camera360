@@ -119,6 +119,7 @@ class _Camera360State extends State<Camera360> with WidgetsBindingObserver {
   // VARIABLES
   // All captured images
   List<XFile> capturedImages = [];
+  List<XFile> capturedImagesForDeletion = [];
   // This value will be updated with the deg the phone must move horizontally
   double horizontalMovementNeeded = 0;
   // The progress till now
@@ -178,32 +179,35 @@ class _Camera360State extends State<Camera360> with WidgetsBindingObserver {
     _setupCameras();
   }
 
-  // Reset Main
-  Future<void> restartApp({String? reason}) async {
-    debugPrint("'Panorama360': Restarting app reason: $reason");
-
+  // Delete files and cache before restarting app
+  Future<void> deleteCache() async {
     // Delete all images
-    await deletePanoramaImages().whenComplete(() {
-      capturedImages = [];
-      horizontalMovementNeeded =
-          0; // This value will be updated with the deg the phone must move horizontally
-      lastSuccessHorizontalPosition = 0; // H Deg on last success image taken
-      helperDotIsHorizontalInPos = false;
-      helperDotHorizontalReach = 0;
-      rightRanges = [];
-      deviceHorizontalDegInitial = null;
-      deviceInCorrectPosition = false;
-      takingPicture = false;
-      hasStitchingFailed = false;
-      nrPhotosTaken = 0;
-      imageSaved = false;
-      isPanoramaBeingStitched = false;
-      lastPhoto = false;
-      lastPhotoTaken = false;
-      nrGoBacksDone = 0;
+    await deletePanoramaImages();
+  }
 
-      updateProgress();
-    });
+  // Reset Main
+  void restartApp({String? reason, bool clearCache = true}) {
+    debugPrint("'Panorama360': Restarting app reason: $reason");
+    deleteCache();
+
+    capturedImages = [];
+    horizontalMovementNeeded =
+        0; // This value will be updated with the deg the phone must move horizontally
+    lastSuccessHorizontalPosition = 0; // H Deg on last success image taken
+    helperDotIsHorizontalInPos = false;
+    helperDotHorizontalReach = 0;
+    rightRanges = [];
+    deviceHorizontalDegInitial = null;
+    deviceInCorrectPosition = false;
+    takingPicture = false;
+    hasStitchingFailed = false;
+    nrPhotosTaken = 0;
+    imageSaved = false;
+    isPanoramaBeingStitched = false;
+    lastPhoto = false;
+    lastPhotoTaken = false;
+    nrGoBacksDone = 0;
+    updateProgress();
   }
 
   // Remove last captured image
@@ -223,10 +227,12 @@ class _Camera360State extends State<Camera360> with WidgetsBindingObserver {
 
   // Delete all panorama images
   Future<void> deletePanoramaImages() async {
-    for (var capturedImage in capturedImages) {
+    capturedImagesForDeletion = capturedImages;
+    for (var capturedImage in capturedImagesForDeletion) {
       try {
         if (await File(capturedImage.path).exists()) {
           await File(capturedImage.path).delete();
+          debugPrint("'Panorama360': Deleted image: ${capturedImage.path}");
         }
       } catch (e) {
         // Error in getting access to the file.
@@ -776,9 +782,11 @@ class _Camera360State extends State<Camera360> with WidgetsBindingObserver {
     // to disable them again when disposed in case user navigates into another
     // view
     _disableSensors();
+
+    // Restart app
     restartApp(reason: "App disposed");
-    super.dispose();
     WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 
   @override
