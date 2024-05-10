@@ -16,35 +16,49 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 import 'camera_360_bindings_generated.dart';
 
 class Camera360 extends StatefulWidget {
-  // Callback called when capture has ended and panorama is prepared
+  /// Callback called when capture has ended and panorama is prepared
   final void Function(Map<String, dynamic>) onCaptureEnded;
-  // Callback called when camera has changed
+
+  /// Callback called when camera has changed
   final void Function(int)? onCameraChanged;
-  // Callback called when progress has changed
+
+  /// Callback called when progress has changed
   final void Function(int)? onProgressChanged;
-  // Preselected camera key
+
+  /// Preselected camera key
   final int? userSelectedCameraKey;
-  // Nr of photos to be taken in a 360 deg rotation
+
+  /// Nr of photos to be taken in a 360 deg rotation
   final int? userNrPhotos;
-  // Image resize size
+
+  /// Image resize size
   final int? userCapturedImageWidth;
-  // Image resize quality
+
+  /// Image resize quality
   final int? userCapturedImageQuality;
-  // Loading text is shown when panorama is being prepared
+
+  /// Loading text is shown when panorama is being prepared
   final String? userLoadingText;
-  // Helper text is shown while taking the first image
+
+  /// Helper text is shown while taking the first image
   final String? userHelperText;
-  // Tilt left text is shown when user should tilt the phone to the left
+
+  /// Tilt left text is shown when user should tilt the phone to the left
   final String? userHelperTiltLeftText;
-  // Tilt right text is shown when user should tilt the phone to the right
+
+  /// Tilt right text is shown when user should tilt the phone to the right
   final String? userHelperTiltRightText;
-  // The vertical deg the user should hold his phone while taking images
+
+  /// The vertical deg the user should hold his phone while taking images
   final double? userDeviceVerticalCorrectDeg;
-  // This popup is shown to help the user select a camera
+
+  /// This popup is shown to help the user select a camera
   final bool cameraSelectorInfoPopUpShow;
-  // cameraSelector popup visibility
+
+  /// cameraSelector popup visibility
   final bool cameraSelectorShow;
-  // cameraSelector popup content <Widget>
+
+  /// cameraSelector popup content <Widget>
   final Widget? cameraSelectorInfoPopUpContent;
 
   const Camera360({
@@ -368,11 +382,11 @@ class _Camera360State extends State<Camera360> with WidgetsBindingObserver {
         ];
         // List<XFile> toStitch = capturedImages;
 
-        stitchImages(toStitch, false).then((value) {
-          testStichingImage = value;
+        try {
+          testStichingImage = await stitchImages(toStitch, false);
           nrGoBacksDone = 0;
           prepareForNextImageCatpure();
-        }).onError((error, stackTrace) async {
+        } catch (error) {
           debugPrint(error.toString());
           // Delete last taken image
           await removeLastCapturedImage();
@@ -384,7 +398,7 @@ class _Camera360State extends State<Camera360> with WidgetsBindingObserver {
           nrPhotosTaken--;
           // Delete last photos if set
           lastPhoto = false;
-        });
+        }
       } else {
         testStichingImage = image;
         prepareForNextImageCatpure();
@@ -619,19 +633,19 @@ class _Camera360State extends State<Camera360> with WidgetsBindingObserver {
       if (isPanoramaBeingStitched == false) {
         isPanoramaBeingStitched = true;
 
-        stitchImages(capturedImages, true).then((value) {
-          finalStitchedImage = value;
+        try {
+          finalStitchedImage = await stitchImages(capturedImages, true);
           isPanoramaBeingStitched = false;
 
           // Callback function
           prepareOnCaptureEnded(finalStitchedImage);
-        }).onError((error, stackTrace) {
+        } catch (_) {
           stitchingFailed();
 
           // Callback function
           prepareOnCaptureEnded(null);
           debugPrint("'Panorama360': Stitching failed");
-        });
+        }
       }
     }
   }

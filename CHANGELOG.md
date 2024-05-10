@@ -1,3 +1,8 @@
+## 1.0.8
+
+- Fix: Replaced future functions with try/catch
+- Added: API Documentation
+
 ## 1.0.7
 
 - Fixed: dispose method
