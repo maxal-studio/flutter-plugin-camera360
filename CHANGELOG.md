@@ -1,3 +1,7 @@
+## 1.0.9
+
+- Added parameter to update the content if camera is not ready or is not found
+
 ## 1.0.8
 
 - Fix: Replaced future functions with try/catch

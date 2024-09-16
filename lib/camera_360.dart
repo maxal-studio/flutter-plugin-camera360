@@ -61,6 +61,9 @@ class Camera360 extends StatefulWidget {
   /// cameraSelector popup content <Widget>
   final Widget? cameraSelectorInfoPopUpContent;
 
+  /// Camera not ready content <Widget>
+  final Widget? cameraNotReadyContent;
+
   const Camera360({
     Key? key,
     required this.onCaptureEnded,
@@ -78,6 +81,7 @@ class Camera360 extends StatefulWidget {
     this.cameraSelectorShow = true,
     this.cameraSelectorInfoPopUpShow = true,
     this.cameraSelectorInfoPopUpContent,
+    this.cameraNotReadyContent,
   }) : super(key: key);
 
   @override
@@ -299,22 +303,23 @@ class _Camera360State extends State<Camera360> with WidgetsBindingObserver {
       selectedCameraKey = 0;
       cameraKey = 0;
     }
-    CameraDescription description = cameras[cameraKey];
-    // Update selectedCameraKey
-    selectedCameraKey = cameraKey;
     // Change the camera
     try {
+      CameraDescription description = cameras[cameraKey];
+      // Update selectedCameraKey
+      selectedCameraKey = cameraKey;
       // initialize camera controllers.
       controller = CameraController(description, ResolutionPreset.high,
           enableAudio: false, imageFormatGroup: ImageFormatGroup.jpeg);
       await controller.initialize();
-    } on CameraException catch (_) {
-      // do something on error.
+      setState(() {
+        _isReady = true;
+      });
+    } catch (_) {
+      setState(() {
+        _isReady = false;
+      });
     }
-    if (!mounted) return;
-    setState(() {
-      _isReady = true;
-    });
   }
 
   // Prepare for taking next image
@@ -805,138 +810,149 @@ class _Camera360State extends State<Camera360> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    if (!_isReady) return Container();
+    if (!_isReady) {
+      return widget.cameraNotReadyContent ??
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+              child: Text(
+                "Camera is not ready",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          );
+    } else {
+      // Kepp the screen on
+      WakelockPlus.enable();
 
-    // Kepp the screen on
-    WakelockPlus.enable();
+      double deviceVerticalDeg =
+          double.parse(degrees(_absoluteOrientation.y).toStringAsFixed(1));
+      double deviceHorizontalDeg = double.parse(
+          (360 - degrees(_absoluteOrientation.x + _absoluteOrientation.z) % 360)
+              .toStringAsFixed(1));
+      double deviceRotationDeg =
+          double.parse(degrees(_absoluteOrientation.z).toStringAsFixed(1));
+      deviceHorizontalDegInitial ??= deviceHorizontalDeg;
+      // Manipulate deg starting from 0
+      double deviceHorizontalDegManipulated = calculateDegreesFromZero(
+          deviceHorizontalDegInitial ?? 0, deviceHorizontalDeg);
 
-    double deviceVerticalDeg =
-        double.parse(degrees(_absoluteOrientation.y).toStringAsFixed(1));
-    double deviceHorizontalDeg = double.parse(
-        (360 - degrees(_absoluteOrientation.x + _absoluteOrientation.z) % 360)
-            .toStringAsFixed(1));
-    double deviceRotationDeg =
-        double.parse(degrees(_absoluteOrientation.z).toStringAsFixed(1));
-    deviceHorizontalDegInitial ??= deviceHorizontalDeg;
-    // Manipulate deg starting from 0
-    double deviceHorizontalDegManipulated = calculateDegreesFromZero(
-        deviceHorizontalDegInitial ?? 0, deviceHorizontalDeg);
+      return LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          double containerWidth = constraints.maxWidth;
+          double containerHeight = constraints.maxHeight;
+          bool isDeviceRotationCorrect = checkDeviceRotation(deviceRotationDeg);
 
-    return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
-        double containerWidth = constraints.maxWidth;
-        double containerHeight = constraints.maxHeight;
-        bool isDeviceRotationCorrect = checkDeviceRotation(deviceRotationDeg);
+          // Centered dot
+          double centeredDotPosX =
+              (containerWidth / 2) - centeredDotRadius - centeredDotBorder;
+          double centeredDotPosY =
+              (containerHeight / 2) - centeredDotRadius - centeredDotBorder;
 
-        // Centered dot
-        double centeredDotPosX =
-            (containerWidth / 2) - centeredDotRadius - centeredDotBorder;
-        double centeredDotPosY =
-            (containerHeight / 2) - centeredDotRadius - centeredDotBorder;
+          // Update Helper Dot horizontal position
+          double helperDotPosX = updateHelperDotHorizontalPosition(
+              deviceHorizontalDegManipulated, containerWidth);
+          // Update Gelper Dot vertical position
+          double helperDotPosY = updateHelperDotVerticalPosition(
+              deviceVerticalDeg, containerHeight);
+          // Update device correct position
+          deviceInCorrectPosition = (helperDotVerticalInPos == true &&
+              helperDotIsHorizontalInPos == true &&
+              isDeviceRotationCorrect == true);
 
-        // Update Helper Dot horizontal position
-        double helperDotPosX = updateHelperDotHorizontalPosition(
-            deviceHorizontalDegManipulated, containerWidth);
-        // Update Gelper Dot vertical position
-        double helperDotPosY =
-            updateHelperDotVerticalPosition(deviceVerticalDeg, containerHeight);
-        // Update device correct position
-        deviceInCorrectPosition = (helperDotVerticalInPos == true &&
-            helperDotIsHorizontalInPos == true &&
-            isDeviceRotationCorrect == true);
+          // Generate right ranges
+          rightRanges = generateRightRanges(helperDotHorizontalReach);
 
-        // Generate right ranges
-        rightRanges = generateRightRanges(helperDotHorizontalReach);
+          // Take picture
+          if (readyToTakePhoto()) {
+            _takePicture();
+          }
 
-        // Take picture
-        if (readyToTakePhoto()) {
-          _takePicture();
-        }
+          // Centere dot color
+          var centeredDotColor = deviceInCorrectPosition == true
+              ? Colors.white.withOpacity(0.7)
+              : Colors.transparent;
 
-        // Centere dot color
-        var centeredDotColor = deviceInCorrectPosition == true
-            ? Colors.white.withOpacity(0.7)
-            : Colors.transparent;
+          //  Helper dot color depending on device rotation
+          var helperDotColor =
+              deviceInCorrectPosition == true ? Colors.white : Colors.red;
 
-        //  Helper dot color depending on device rotation
-        var helperDotColor =
-            deviceInCorrectPosition == true ? Colors.white : Colors.red;
+          // If no more photos are needed than it's time to stitch the final panorama
+          if (morePhotosNeeded() == false) {
+            prepareFinalPanorama();
+          }
 
-        // If no more photos are needed than it's time to stitch the final panorama
-        if (morePhotosNeeded() == false) {
-          prepareFinalPanorama();
-        }
-
-        return Container(
-          color: Colors.black,
-          child: morePhotosNeeded()
-              ? Stack(
-                  children: [
-                    Center(
-                      child: CameraPreview(controller),
+          return Container(
+            color: Colors.black,
+            child: morePhotosNeeded()
+                ? Stack(
+                    children: [
+                      Center(
+                        child: CameraPreview(controller),
+                      ),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          widget.cameraSelectorShow == true
+                              ? CameraSelector(
+                                  cameras: cameras,
+                                  selectedCameraKey: selectedCameraKey,
+                                  infoPopUpContent:
+                                      widget.cameraSelectorInfoPopUpContent,
+                                  infoPopUpShow:
+                                      widget.cameraSelectorInfoPopUpShow,
+                                  onCameraChanged: (cameraKey) {
+                                    selectCamera(cameraKey);
+                                  })
+                              : Container(),
+                          // Reset
+                          // ElevatedButton(
+                          //     onPressed: () =>
+                          //         restartApp(reason: "Restet button hit"),
+                          //     child: const Text("reset")),
+                        ],
+                      ),
+                      // Helper Text for the first image
+                      HelperText(
+                        shown: capturedImages.isEmpty &&
+                            (helperDotVerticalInPos == false ||
+                                helperDotIsHorizontalInPos == false),
+                        helperText: helperText,
+                      ),
+                      // Display titl helper text
+                      HelperText(
+                        shown: helperDotVerticalInPos == true &&
+                            helperDotIsHorizontalInPos == true &&
+                            isDeviceRotationCorrect == false,
+                        helperText: checkLeftDeviceRotation(deviceRotationDeg)
+                            ? helperTiltLeftText
+                            : helperTiltRightText,
+                      ),
+                      // Displays dots to help the user orientate
+                      OrientationHelpers(
+                        helperDotPosX: helperDotPosX,
+                        helperDotPosY: helperDotPosY,
+                        helperDotRadius: helperDotRadius,
+                        helperDotColor: helperDotColor,
+                        centeredDotPosX: centeredDotPosX,
+                        centeredDotRadius: centeredDotRadius,
+                        centeredDotPosY: centeredDotPosY,
+                        centeredDotBorder: centeredDotBorder,
+                        centeredDotColor: centeredDotColor,
+                        isDeviceRotationCorrect: isDeviceRotationCorrect,
+                        deviceRotationDeg: deviceRotationDeg,
+                      ),
+                    ],
+                  )
+                : Center(
+                    child: Text(
+                      loadingText,
+                      style: const TextStyle(color: Colors.white),
                     ),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        widget.cameraSelectorShow == true
-                            ? CameraSelector(
-                                cameras: cameras,
-                                selectedCameraKey: selectedCameraKey,
-                                infoPopUpContent:
-                                    widget.cameraSelectorInfoPopUpContent,
-                                infoPopUpShow:
-                                    widget.cameraSelectorInfoPopUpShow,
-                                onCameraChanged: (cameraKey) {
-                                  selectCamera(cameraKey);
-                                })
-                            : Container(),
-                        // Reset
-                        // ElevatedButton(
-                        //     onPressed: () =>
-                        //         restartApp(reason: "Restet button hit"),
-                        //     child: const Text("reset")),
-                      ],
-                    ),
-                    // Helper Text for the first image
-                    HelperText(
-                      shown: capturedImages.isEmpty &&
-                          (helperDotVerticalInPos == false ||
-                              helperDotIsHorizontalInPos == false),
-                      helperText: helperText,
-                    ),
-                    // Display titl helper text
-                    HelperText(
-                      shown: helperDotVerticalInPos == true &&
-                          helperDotIsHorizontalInPos == true &&
-                          isDeviceRotationCorrect == false,
-                      helperText: checkLeftDeviceRotation(deviceRotationDeg)
-                          ? helperTiltLeftText
-                          : helperTiltRightText,
-                    ),
-                    // Displays dots to help the user orientate
-                    OrientationHelpers(
-                      helperDotPosX: helperDotPosX,
-                      helperDotPosY: helperDotPosY,
-                      helperDotRadius: helperDotRadius,
-                      helperDotColor: helperDotColor,
-                      centeredDotPosX: centeredDotPosX,
-                      centeredDotRadius: centeredDotRadius,
-                      centeredDotPosY: centeredDotPosY,
-                      centeredDotBorder: centeredDotBorder,
-                      centeredDotColor: centeredDotColor,
-                      isDeviceRotationCorrect: isDeviceRotationCorrect,
-                      deviceRotationDeg: deviceRotationDeg,
-                    ),
-                  ],
-                )
-              : Center(
-                  child: Text(
-                    loadingText,
-                    style: const TextStyle(color: Colors.white),
                   ),
-                ),
-        );
-      },
-    );
+          );
+        },
+      );
+    }
   }
 }

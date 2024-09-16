@@ -69,6 +69,16 @@ Camera360(
       color: Color(0xffEFEFEF),
     ),
   ),
+  // Customizable message if camera is not found or not ready
+  cameraNotReadyContent: const Center(
+    child: Padding(
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+      child: Text(
+        "Camera not ready",
+        style: TextStyle(fontWeight: FontWeight.bold),
+      ),
+    ),
+  ),
   // Callback function called when 360 capture ended
   onCaptureEnded: (data) {
     // Returned data will be a map like below
