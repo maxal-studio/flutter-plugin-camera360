@@ -102,7 +102,6 @@ class _CameraPageState extends State<CameraPage> {
             } else {
               displayPanoramaMessage(context, 'Panorama failed!');
             }
-            print(data);
           },
           // Callback function called when the camera lens is changed
           onCameraChanged: (cameraKey) {
