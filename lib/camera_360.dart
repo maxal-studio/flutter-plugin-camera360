@@ -58,10 +58,10 @@ class Camera360 extends StatefulWidget {
   /// cameraSelector popup visibility
   final bool cameraSelectorShow;
 
-  /// cameraSelector popup content <Widget>
+  /// cameraSelector popup content [Widget]
   final Widget? cameraSelectorInfoPopUpContent;
 
-  /// Camera not ready content <Widget>
+  /// Camera not ready content [Widget]
   final Widget? cameraNotReadyContent;
 
   const Camera360({
@@ -155,6 +155,10 @@ class _Camera360State extends State<Camera360> with WidgetsBindingObserver {
   bool deviceInCorrectPosition = false;
   // While taking image is set to true
   bool takingPicture = false;
+  // While waiting to take picture
+  bool isWaitingToTakePhoto = false;
+  // Time to wait before taking picture
+  int timeToWaitBeforeTakingPicture = 1000; // milliseconds
   // When stitching failes the user will need to take a nother image
   // more to the left
   bool hasStitchingFailed = false;
@@ -171,6 +175,9 @@ class _Camera360State extends State<Camera360> with WidgetsBindingObserver {
   bool isPanoramaBeingStitched = false;
   bool lastPhoto = false;
   bool lastPhotoTaken = false;
+
+  // Add this field at the top of the class with other variables
+  Timer? _waitingTimer;
 
   @override
   void initState() {
@@ -685,7 +692,7 @@ class _Camera360State extends State<Camera360> with WidgetsBindingObserver {
   // Stitch the images
   Future<XFile> stitchImages(List<XFile> images, bool cropped) async {
     // For Android, you call DynamicLibrary to find and open the shared library
-    // You don’t need to do this in iOS since all linked symbols map when an app runs.
+    // You don't need to do this in iOS since all linked symbols map when an app runs.
     final dylib = Platform.isAndroid
         ? DynamicLibrary.open("libcamera_360.so")
         : DynamicLibrary.process();
@@ -794,6 +801,7 @@ class _Camera360State extends State<Camera360> with WidgetsBindingObserver {
 
   @override
   void dispose() {
+    _waitingTimer?.cancel();
     // Disable screen always on
     WakelockPlus.disable();
     controller.dispose();
@@ -865,12 +873,56 @@ class _Camera360State extends State<Camera360> with WidgetsBindingObserver {
 
           // Take picture
           if (readyToTakePhoto()) {
-            _takePicture();
+            if (!takingPicture && !isWaitingToTakePhoto) {
+              takingPicture = true;
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) {
+                  setState(() {
+                    isWaitingToTakePhoto = true;
+                  });
+
+                  _waitingTimer?.cancel();
+                  _waitingTimer = Timer(
+                    Duration(milliseconds: timeToWaitBeforeTakingPicture),
+                    () {
+                      if (mounted) {
+                        // Only proceed if device is still in correct position after the full duration
+                        if (deviceInCorrectPosition &&
+                            takingPicture &&
+                            isWaitingToTakePhoto) {
+                          setState(() {
+                            isWaitingToTakePhoto = false;
+                          });
+                          _takePicture();
+                        } else {
+                          setState(() {
+                            isWaitingToTakePhoto = false;
+                            takingPicture = false;
+                          });
+                        }
+                      }
+                    },
+                  );
+                }
+              });
+            }
+          } else if ((takingPicture || isWaitingToTakePhoto) &&
+              !deviceInCorrectPosition) {
+            // Cancel timer and reset states if device moves out of position
+            _waitingTimer?.cancel();
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                setState(() {
+                  takingPicture = false;
+                  isWaitingToTakePhoto = false;
+                });
+              }
+            });
           }
 
           // Centere dot color
           var centeredDotColor = deviceInCorrectPosition == true
-              ? Colors.white.withOpacity(0.7)
+              ? Colors.white.withValues(alpha: 0.7)
               : Colors.transparent;
 
           //  Helper dot color depending on device rotation
@@ -939,8 +991,12 @@ class _Camera360State extends State<Camera360> with WidgetsBindingObserver {
                         centeredDotPosY: centeredDotPosY,
                         centeredDotBorder: centeredDotBorder,
                         centeredDotColor: centeredDotColor,
+                        deviceInCorrectPosition: deviceInCorrectPosition,
                         isDeviceRotationCorrect: isDeviceRotationCorrect,
                         deviceRotationDeg: deviceRotationDeg,
+                        isWaitingToTakePhoto: isWaitingToTakePhoto,
+                        timeToWaitBeforeTakingPicture:
+                            timeToWaitBeforeTakingPicture,
                       ),
                     ],
                   )

@@ -1,6 +1,6 @@
 name: camera_360
 description: This plugin allows the users to take 360 Panoramic Images using the phone's Camera. It uses OpenCV to stitch the images together.
-version: 1.0.9
+version: 1.1.0
 homepage: https://github.com/maxal-studio/flutter-plugin-camera360
 
 topics:
@@ -8,7 +8,7 @@ topics:
   - panorama
 
 environment:
-  sdk: ">=3.0.2 <4.0.0"
+  sdk: '>=3.5.3 <4.0.0'
   flutter: ">=3.3.0"
 
 dependencies:
@@ -16,7 +16,7 @@ dependencies:
     sdk: flutter
   plugin_platform_interface: ^2.0.2
   camera: ^0.10.5+5
-  dchs_motion_sensors: ^1.0.2
+  dchs_motion_sensors: ^2.0.0
   wakelock_plus: ^1.1.1
   image_picker: ^1.0.4
   path_provider: ^2.1.0

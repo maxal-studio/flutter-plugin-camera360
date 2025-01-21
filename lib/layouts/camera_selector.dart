@@ -108,7 +108,7 @@ class _CameraSelectorState extends State<CameraSelector> {
                           padding: const EdgeInsets.symmetric(
                               vertical: 15, horizontal: 50),
                           decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.8),
+                            color: Colors.black.withValues(alpha: 0.8),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: infoPopUpContentValue,
@@ -116,7 +116,7 @@ class _CameraSelectorState extends State<CameraSelector> {
                         ClipPath(
                           clipper: TriangleClipper(),
                           child: Container(
-                            color: Colors.black.withOpacity(0.8),
+                            color: Colors.black.withValues(alpha: 0.8),
                             height: 10,
                             width: 20,
                           ),
@@ -130,14 +130,14 @@ class _CameraSelectorState extends State<CameraSelector> {
             Container(
               padding: const EdgeInsets.only(left: 10, right: 20),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.8),
+                color: Colors.black.withValues(alpha: 0.8),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: DropdownButton(
                 onTap: () {
                   hideHelperPopUP();
                 },
-                dropdownColor: Colors.black.withOpacity(0.8),
+                dropdownColor: Colors.black.withValues(alpha: 0.8),
                 underline: const SizedBox(),
                 icon: const ImageIcon(
                   AssetImage(

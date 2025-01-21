@@ -19,12 +19,12 @@ class DeviceRotation extends StatelessWidget {
                 Container(
                   width: 4,
                   height: 7,
-                  color: Colors.white.withOpacity(0.5),
+                  color: Colors.white.withValues(alpha: 0.5),
                 ),
                 Container(
                   width: 4,
                   height: 7,
-                  color: Colors.white.withOpacity(0.5),
+                  color: Colors.white.withValues(alpha: 0.5),
                 ),
               ],
             ),

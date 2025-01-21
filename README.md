@@ -21,14 +21,6 @@ Add these lines into `Info.plist`
 <string>This application needs access to your Photo Library in order to save the captured images</string>
 ```
 
-### Android
-
-#### Attention when building release versions since OpenCV has been built for different CPUS we recommend running this command to build multiple APKs:
-
-```properties
-flutter build apk --split-per-abi --release
-```
-
 Change the minimum Android sdk version to 21 (or higher) in your `android/app/build.gradle` file.
 
 ```properties

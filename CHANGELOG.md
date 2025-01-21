@@ -1,3 +1,8 @@
+## 1.1.0
+
+- Update: Added a delay when taking the picture to prevent taking blurry images
+- Update: Updated dchs_motion_sensors to 2.0.0
+- Update: Bumped min sdk to 3.5.3
 ## 1.0.9
 
 - Added parameter to update the content if camera is not ready or is not found
