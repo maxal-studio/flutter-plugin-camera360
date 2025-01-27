@@ -1,7 +1,7 @@
 import 'package:camera_360/camera_360.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:gallery_saver/gallery_saver.dart';
+import 'package:gallery_saver_plus/gallery_saver.dart';
 
 void main() {
   runApp(const MyApp());

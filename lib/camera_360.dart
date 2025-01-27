@@ -3,7 +3,7 @@ import 'package:camera_360/layouts/helper_text.dart';
 import 'package:camera_360/layouts/orientation_helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
-import 'package:flutter_native_image/flutter_native_image.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:dchs_motion_sensors/dchs_motion_sensors.dart';
 import 'dart:async';
 import 'package:vector_math/vector_math_64.dart' hide Colors;
@@ -347,16 +347,31 @@ class _Camera360State extends State<Camera360> with WidgetsBindingObserver {
   }
 
   // Resize captured image for faster stitching
-  Future<XFile> resizeImage(img) async {
-    ImageProperties properties =
-        await FlutterNativeImage.getImageProperties(img.path);
+  Future<XFile> resizeImage(File img) async {
+    final filePath = img.absolute.path;
+    final lastIndex = filePath.lastIndexOf(RegExp(r'.png|.jp'));
+    final splitted = filePath.substring(0, (lastIndex));
+    final outPath = "${splitted}_compressed${filePath.substring(lastIndex)}";
 
-    File compressedFile = await FlutterNativeImage.compressImage(img.path,
+    XFile? compressedImage;
+    if (lastIndex == filePath.lastIndexOf(RegExp(r'.png'))) {
+      compressedImage = await FlutterImageCompress.compressAndGetFile(
+        filePath,
+        outPath,
+        format: CompressFormat.png,
         quality: capturedImageQuality,
-        targetWidth: capturedImageWidth,
-        targetHeight:
-            (properties.height! * capturedImageWidth / properties.width!)
-                .round());
+        minWidth: capturedImageWidth,
+        minHeight: 1,
+      );
+    } else {
+      compressedImage = await FlutterImageCompress.compressAndGetFile(
+        filePath,
+        outPath,
+        quality: capturedImageQuality,
+        minWidth: capturedImageWidth,
+        minHeight: 1,
+      );
+    }
 
     // delete original file
     try {
@@ -365,9 +380,12 @@ class _Camera360State extends State<Camera360> with WidgetsBindingObserver {
       }
     } catch (e) {
       // Error in getting access to the file.
+      debugPrint("'Panorama360': Failed Deleting panorama image");
     }
 
-    return XFile(compressedFile.path);
+    debugPrint("'Panorama360': Image taken: ${compressedImage!.path}");
+
+    return XFile(compressedImage.path);
   }
 
   // Take picture
@@ -376,8 +394,8 @@ class _Camera360State extends State<Camera360> with WidgetsBindingObserver {
       takingPicture = true;
       // Attempt to take a picture and then get the location
       // where the image file is saved.
-      final image = await controller.takePicture().then((XFile? file) {
-        return resizeImage(file);
+      XFile image = await controller.takePicture().then((XFile? file) {
+        return resizeImage(File(file!.path));
       });
 
       // Prepare for taking the next image

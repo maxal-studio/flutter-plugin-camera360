@@ -1,3 +1,10 @@
+## 1.1.1
+
+- Added: Missing namespace in build.gradle
+- Updated: Replaced flutter_native_image with flutter_image_compress
+- Example: Replaced gallery_saver with gallery_saver_plus
+- Updated: gradle version to 8.3
+
 ## 1.1.0
 
 - Update: Added a delay when taking the picture to prevent taking blurry images

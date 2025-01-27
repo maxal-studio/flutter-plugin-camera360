@@ -1,21 +1,7 @@
 // The Android Gradle Plugin builds the native code with the Android NDK.
 
-group 'com.example.camera_360'
+group 'al.max.camera_360'
 version '1.0'
-
-buildscript {
-    // ext.kotlin_version = '1.7.10'
-    repositories {
-        google()
-        mavenCentral()
-    }
-
-    dependencies {
-        // The Android Gradle Plugin knows how to build native code with the NDK.
-        classpath 'com.android.tools.build:gradle:7.3.0'
-        // classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-    }
-}
 
 rootProject.allprojects {
     repositories {
@@ -27,6 +13,7 @@ rootProject.allprojects {
 apply plugin: 'com.android.library'
 
 android {
+    namespace "al.max.camera_360"
     // Bumping the plugin compileSdkVersion requires all clients of this plugin
     // to bump the version in their app.
     compileSdkVersion 31
@@ -75,7 +62,3 @@ android {
     //     }
     // }
 }
-
-// dependencies {
-//     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-// }
