@@ -1,19 +1,15 @@
 import 'package:camera_360/layouts/camera_selector.dart';
 import 'package:camera_360/layouts/helper_text.dart';
 import 'package:camera_360/layouts/orientation_helpers.dart';
+import 'package:camera_360/utilities/stitcher.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:dchs_motion_sensors/dchs_motion_sensors.dart';
 import 'dart:async';
 import 'package:vector_math/vector_math_64.dart' hide Colors;
-import 'dart:ffi';
-import 'package:ffi/ffi.dart';
 import 'dart:io';
-import 'package:path_provider/path_provider.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
-
-import 'camera_360_bindings_generated.dart';
 
 class Camera360 extends StatefulWidget {
   /// Callback called when capture has ended and panorama is prepared
@@ -24,6 +20,13 @@ class Camera360 extends StatefulWidget {
 
   /// Callback called when progress has changed
   final void Function(int)? onProgressChanged;
+
+  /// Determines when image stitching is performed.
+  /// If set to true, the application will check if each newly captured image
+  /// can be stitched with the previous one immediately after capture.
+  /// If set to false, all images will be captured first,
+  /// and stitching will be performed at the end.
+  final bool userCheckStitchingDuringCapture;
 
   /// Preselected camera key
   final int? userSelectedCameraKey;
@@ -82,6 +85,7 @@ class Camera360 extends StatefulWidget {
     this.cameraSelectorInfoPopUpShow = true,
     this.cameraSelectorInfoPopUpContent,
     this.cameraNotReadyContent,
+    this.userCheckStitchingDuringCapture = false,
   }) : super(key: key);
 
   @override
@@ -167,6 +171,7 @@ class _Camera360State extends State<Camera360> with WidgetsBindingObserver {
   String helperText = "";
   String helperTiltLeftText = "";
   String helperTiltRightText = "";
+  bool checkStitchingDuringCapture = false;
 
   int nrPhotosTaken = 0;
   late XFile testStichingImage; // Stitched panorama image
@@ -199,7 +204,7 @@ class _Camera360State extends State<Camera360> with WidgetsBindingObserver {
     helperText = widget.userHelperText ?? 'Point the camera at the dot';
     helperTiltLeftText = widget.userHelperTiltLeftText ?? 'Tilt left';
     helperTiltRightText = widget.userHelperTiltRightText ?? 'Tilt right';
-
+    checkStitchingDuringCapture = widget.userCheckStitchingDuringCapture;
     _setupSensors();
     _setupCameras();
   }
@@ -404,16 +409,24 @@ class _Camera360State extends State<Camera360> with WidgetsBindingObserver {
       // Update nrPhotosTaken
       nrPhotosTaken++;
 
-      // Check if last two images can be stiched
+      // Check if stitching during capture is disabled
+      if (checkStitchingDuringCapture == false) {
+        debugPrint("'Panorama360': Stitching during capture is disabled");
+        testStichingImage = image;
+        prepareForNextImageCatpure();
+        return image;
+      }
+      debugPrint("'Panorama360': Stitching during capture is enabled");
+
+      // Check if last taken image can be stitched with the previous one
       if (nrPhotosTaken > 1) {
         List<XFile> toStitch = [
           capturedImages[capturedImages.length - 2],
           image
         ];
-        // List<XFile> toStitch = capturedImages;
 
         try {
-          testStichingImage = await stitchImages(toStitch, false);
+          testStichingImage = await Stitcher.stitchImages(toStitch, false);
           nrGoBacksDone = 0;
           prepareForNextImageCatpure();
         } catch (error) {
@@ -664,7 +677,8 @@ class _Camera360State extends State<Camera360> with WidgetsBindingObserver {
         isPanoramaBeingStitched = true;
 
         try {
-          finalStitchedImage = await stitchImages(capturedImages, true);
+          finalStitchedImage =
+              await Stitcher.stitchImages(capturedImages, true);
           isPanoramaBeingStitched = false;
 
           // Callback function
@@ -682,19 +696,22 @@ class _Camera360State extends State<Camera360> with WidgetsBindingObserver {
 
   // Check if more photos are needed to complete a 360 deg panorama
   bool morePhotosNeeded() {
-    // If next (to reach) horizontal position is <= 360 then allow to take more photos
-    // Last photo should be as close as possible to 360 DEG
+    if (checkStitchingDuringCapture == false) {
+      // If stitching during capture is disabled then check if all photos are taken
+      if (nrPhotosTaken == nrPhotos) {
+        return false;
+      }
+    } else {
+      // If next (to reach) horizontal position is <= 360 then allow to take more photos
+      // Last photo should be as close as possible to 360 DEG
 
-    // The last photo taken will be at 360deg or more then 360 deg, but not less
-    if (nrPhotosTaken >= nrPhotos &&
-        (lastSuccessHorizontalPosition == 360 ||
-            lastSuccessHorizontalPosition <= degToNextPosition)) {
-      return false;
+      // The last photo taken will be at 360deg or more then 360 deg, but not less
+      if (nrPhotosTaken >= nrPhotos &&
+          (lastSuccessHorizontalPosition == 360 ||
+              lastSuccessHorizontalPosition <= degToNextPosition)) {
+        return false;
+      }
     }
-
-    // if (lastSuccessHorizontalPosition == 360) {
-    //   return false;
-    // }
 
     return true;
   }
@@ -705,40 +722,6 @@ class _Camera360State extends State<Camera360> with WidgetsBindingObserver {
         deviceInCorrectPosition &&
         takingPicture == false &&
         hasStitchingFailed == false;
-  }
-
-  // Stitch the images
-  Future<XFile> stitchImages(List<XFile> images, bool cropped) async {
-    // For Android, you call DynamicLibrary to find and open the shared library
-    // You don't need to do this in iOS since all linked symbols map when an app runs.
-    final dylib = Platform.isAndroid
-        ? DynamicLibrary.open("libcamera_360.so")
-        : DynamicLibrary.process();
-
-    List<String> imagePaths = [];
-    imagePaths = images.map((imageFile) {
-      return imageFile.path;
-    }).toList();
-    imagePaths.toString().toNativeUtf8();
-    debugPrint(imagePaths.toString());
-
-    // Bindings
-    final Camera360Bindings bindings = Camera360Bindings(dylib);
-
-    String dirpath =
-        "${(await getApplicationDocumentsDirectory()).path}/stitched-panorama-${DateTime.now().millisecondsSinceEpoch}.jpg";
-
-    bool isStiched = bindings.stitch(
-        imagePaths.toString().toNativeUtf8() as Pointer<Char>,
-        dirpath.toNativeUtf8() as Pointer<Char>,
-        cropped);
-
-    if (!isStiched) {
-      throw Exception('Stiching failed');
-    }
-
-    // Return the stiched image
-    return XFile(dirpath);
   }
 
   // Stitching failed
@@ -767,6 +750,7 @@ class _Camera360State extends State<Camera360> with WidgetsBindingObserver {
 
   // On progress updated
   void updateProgress() {
+    debugPrint(helperDotHorizontalReach.toString());
     int newProgressPercentage = (helperDotHorizontalReach * 100 / 360).round();
     if (newProgressPercentage > 100 ||
         (nrPhotosTaken >= nrPhotos &&

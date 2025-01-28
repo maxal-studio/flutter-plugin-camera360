@@ -38,6 +38,12 @@ minSdkVersion 21
 import 'package:camera_360/camera_360.dart';
 import 'package:image_picker/image_picker.dart';
 Camera360(
+  // Determines when image stitching is performed.
+  // If set to true, the application will check if each newly captured image
+  // can be stitched with the previous one immediately after capture.
+  // If set to false, all images will be captured first,
+  // and stitching will be performed at the end.
+  userCheckStitchingDuringCapture: true,
   // Text shown while panorama image is being prepared
   userLoadingText: "Preparing panorama...",
   // Text shown on while taking the first image

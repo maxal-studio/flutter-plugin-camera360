@@ -55,6 +55,12 @@ class _CameraPageState extends State<CameraPage> {
     return Stack(
       children: [
         Camera360(
+          // Determines when image stitching is performed.
+          // If set to true, the application will check if each newly captured image
+          // can be stitched with the previous one immediately after capture.
+          // If set to false, all images will be captured first,
+          // and stitching will be performed at the end.
+          userCheckStitchingDuringCapture: false,
           // Text shown while panorama image is being prepared
           userLoadingText: "Preparing panorama...",
           // Text shown on while taking the first image
