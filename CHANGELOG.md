@@ -1,3 +1,7 @@
+## 1.1.2
+
+- Update: Bumped dchs_motion_sensors to 2.0.1
+
 ## 1.1.1
 
 - Added: Missing namespace in build.gradle
